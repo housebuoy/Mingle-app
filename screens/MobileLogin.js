@@ -13,11 +13,15 @@ const MobileLogin = ({navigation}) => {
             setModalVisible(true);
             setTimeout(() => {
                 setModalVisible(false);
-                navigation.navigate('PhoneVerificationScreen');
               }, 1000);
             return false;
+        }else{
+            setTimeout(() => {
+                setModalVisible(false);
+                navigation.navigate('PhoneVerificationScreen');
+              }, 1000);
+            return true;
         }
-        return true;
     };
 
     const handleSubmit = () => {
@@ -143,6 +147,24 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins-Bold',
         fontSize: 18,
         textAlign: 'center'
+      },
+      modalView: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      modalText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
       },
 
 });

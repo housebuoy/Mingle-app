@@ -66,7 +66,8 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 64,
     fontFamily: 'GrandHotel-Regular',
-    color: '#000'
+    color: '#000',
+    marginLeft: 20
   },
   subLogoText: {
     fontSize: 24,

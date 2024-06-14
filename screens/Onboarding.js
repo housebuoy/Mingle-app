@@ -5,9 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import female1 from '../assets/images/onboarding/female1.png';
 import female2 from '../assets/images/onboarding/female2.png';
 import male from '../assets/images/onboarding/male.png';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { useCallback } from 'react';
 import Swiper from 'react-native-swiper';
 
 const Onboarding = ({navigation}) => {
@@ -57,14 +54,8 @@ return (
                                 Sign in
                                 <Text style={styles.tipText}>
                                     " you agree to our
-                                    <Text style={{color: '#E94057', fontFamily: 'Poppins-Bold',}}>
-                                        Terms
-                                        <Text style={styles.tipText}>
-                                            and
-                                            <Text style={{color: '#E94057', fontFamily: 'Poppins-Bold'}}>
-                                                Conditions
-                                            </Text>
-                                        </Text>
+                                    <Text style={{color: '#E94057', fontFamily: 'Poppins-Bold', marginLeft: 20}}>
+                                        Terms and Conditions
                                     </Text>
                                 </Text>
                             </Text>
@@ -80,7 +71,7 @@ return (
             <Text style={styles.tipText}>
                     Already have an account?
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{}}>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{}}>
                 <Text style={{fontFamily: 'Poppins-Bold', color: '#E94057', marginLeft: 20}}>Sign In</Text>
             </TouchableOpacity>
         </View>
@@ -128,7 +119,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     textAlign: 'center',
     paddingHorizontal: 43,
-    marginTop: 20
+    marginTop: 20,
   },
 
   image: {

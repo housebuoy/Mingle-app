@@ -1,35 +1,40 @@
-import React, {useState, useEffect} from 'react'
-import { View, Text, StatusBar, Image, StyleSheet, TouchableOpacity, TextInput, Pressable } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context';
-// import Constants from 'expo-constants';
-import { useCallback } from 'react';
-
+import React, { useState } from 'react';
+import { View, Text, StatusBar, Image, StyleSheet, TouchableOpacity, SafeAreaView, TextInput, Pressable, Modal } from 'react-native';
 
 const MobileLogin = ({navigation}) => {
-    // const [selected, setSelected] = React.useState('+91');
-    // const [country, setCountry] = React.useState('');
-    // const [phone, setPhone] = React.useState('');
-
     const [mobileNumber, setMobileNumber] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+
+    const validateMobileNumberFormat = (number) => {
+        const regex = /^\+\d{4,15}/;
+        if (!regex.test(number)) {
+            setModalMessage("Please enter a valid mobile number with country code.");
+            setModalVisible(true);
+            setTimeout(() => {
+                setModalVisible(false);
+                navigation.navigate('PhoneVerificationScreen');
+              }, 1000);
+            return false;
+        }
+        return true;
+    };
 
     const handleSubmit = () => {
-        // Handle form submission and mobile number verification logic here
-        console.log('Mobile Number:', mobileNumber);
-        // Call a function to send the mobile number for verification
-        verifyMobileNumber(mobileNumber);
+        if (validateMobileNumberFormat(mobileNumber)) {
+            console.log('Mobile Number:', mobileNumber);
+            verifyMobileNumber(mobileNumber);
+        }
     };
 
     const verifyMobileNumber = (number) => {
-        // Implement your mobile number verification logic here
         console.log('Verifying mobile number:', number);
-        // Simulate a successful verification
         console.log('Mobile number verified successfully!');
     };
 
-
     return (
         <SafeAreaView style={styles.container}>
-            <View>
+                       <View>
                 <Text style={styles.textHeading}>
                     My mobile
                 </Text>
@@ -49,7 +54,7 @@ const MobileLogin = ({navigation}) => {
                             placeholder="+233 207026823"
                             value={mobileNumber}
                             onChangeText={setMobileNumber}
-                            keyboardType="phone-pad"
+                            keyboardType='phone-pad'
                         />
                     </View>
                 </View>
@@ -57,7 +62,20 @@ const MobileLogin = ({navigation}) => {
                     <Text style={styles.buttonText}>Continue</Text>
                 </Pressable>
             </View>
-            
+            <Modal
+                animationType="fade"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(false);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <Text style={styles.modalText}>{modalMessage}</Text>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     )
 }

@@ -6,7 +6,8 @@ import Onboarding from './screens/Onboarding';
 import SignIn from './screens/SignIn';
 import MobileLogin from './screens/MobileLogin';
 import EmailInputScreen from './screens/EmailInputScreen.js';
-// import Login from './screens/Login.js';
+import Login from './screens/Login.js';
+import PhoneVerificationScreen from './screens/PhoneVerificationScreen.js';
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -45,12 +46,18 @@ export default function App() {
           options={{
             headerShown: false,
           }} />
-        {/* <Stack.Screen 
+        <Stack.Screen 
           name="Login" 
           component={Login}
           options={{
             headerShown: false,
-          }} /> */}
+          }} />
+        <Stack.Screen 
+          name="PhoneVerificationScreen" 
+          component={PhoneVerificationScreen}
+          options={{
+            headerShown: false,
+          }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

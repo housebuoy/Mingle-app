@@ -50,7 +50,7 @@ const PhoneVerificationScreen = ({ navigation }) => {
 
     if (index === 3 && value) {
       // All inputs are filled
-      navigation.navigate('Home');
+      navigation.navigate('Profile');
     }
   };
 
@@ -58,7 +58,7 @@ const PhoneVerificationScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.centeredContainer}>
       <Text style={styles.SectionTitle}>Verification Code</Text>
-      <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#8D8B8B", lineHeight: 25, width: '80%' }}>Type the verification code we've sent you or retry after the timeout.</Text>
+      <Text style={{fontFamily: 'Poppins-Medium', fontSize: 20, color: "#8D8B8B", lineHeight: 25, width: '80%', textAlign: 'center' }}>Type the verification code we've sent you via sms.</Text>
         <Text style={styles.timerText}>{`00:${timer < 10 ? '0' : ''}${timer}`}</Text>
         <View style={styles.codeContainer}>
           {code.map((digit, index) => (
@@ -68,6 +68,7 @@ const PhoneVerificationScreen = ({ navigation }) => {
               style={[styles.input, styles.codeInput, digit && styles.filledInput]}
               keyboardType="number-pad"
               maxLength={1}
+              placeholder='0'
               value={digit}
               onChangeText={(value) => handleChange(index, value)}
             />
@@ -141,18 +142,23 @@ const styles = StyleSheet.create({
   codeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    // alignItems: 'center',
     width: '80%',
     marginBottom: 30,
   },
   codeInput: {
     borderBottomWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderBottomColor: '#ccc',
-    fontSize: 24,
-    color: '#333',
+    fontSize: 26,
     textAlign: 'center',
     paddingVertical: 10,
-    width: '20%',
+    width: '22%',
     borderRadius: 10,
+    backgroundColor: 'white',
+    color: '#E94057',
+    fontFamily: 'Poppins-Bold',
   },
   filledInput: {
     backgroundColor: '#E94057',
@@ -160,14 +166,15 @@ const styles = StyleSheet.create({
   },
   input: {
     width: '100%',
-    paddingVertical: 15,
+    paddingVertical: 13,
     paddingHorizontal: 20,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#d80808',
     borderRadius: 25,
-    fontSize: 16,
+    fontSize: 26,
     marginBottom: 20,
     fontFamily: 'Poppins-Bold',
+    color: '#c04b4b',
   },
   inputButton: {
     backgroundColor: '#E94057',

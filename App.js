@@ -8,10 +8,36 @@ import MobileLogin from './screens/MobileLogin';
 import EmailInputScreen from './screens/EmailInputScreen.js';
 import Login from './screens/Login.js';
 import PhoneVerificationScreen from './screens/PhoneVerificationScreen.js';
+import ProfileScreen from './screens/ProfileScreen.js';
 const Stack = createStackNavigator();
+import { initializeApp } from "firebase/app";
+import { onAuthStateChanged } from 'firebase/auth';
+import {useState} from 'react'
+import firebase from 'firebase/compat/app';
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   fonts()
+  const firebaseConfig = {
+    apiKey: "AIzaSyDixvimHovdeu5raYj4LTnkXH6YVdBOgFg",
+    authDomain: "mingle-3b8ec.firebaseapp.com",
+    projectId: "mingle-3b8ec",
+    storageBucket: "mingle-3b8ec.appspot.com",
+    messagingSenderId: "701325819599",
+    appId: "1:701325819599:web:3de1e240c8881178f681ba"
+  };
+
+  if(firebase.apps.length){
+    firebase.initializeApp(firebaseConfig);  
+  }
+
+  firebase.onAuthStateChanged(auth, (user) => {
+    if (user != null){
+      console.log('We are authenticated now!');
+    }
+  })
+
+
   return (
      <NavigationContainer>
       <Stack.Navigator initialRouteName="Welcome">
@@ -58,10 +84,15 @@ export default function App() {
           options={{
             headerShown: false,
           }} />
+        <Stack.Screen 
+          name="Profile" 
+          component={ProfileScreen}
+          options={{
+            headerShown: false,
+          }} />
       </Stack.Navigator>
     </NavigationContainer>
-  );
-}
+  );}
 
 // const styles = StyleSheet.create({
 //   container: {

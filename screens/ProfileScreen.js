@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity,Pressable, Image, Modal } from 'react-native';
-import { launchImageLibrary } from 'react-native-image-picker';
-// import { Calendar } from 'react-native-calendars';
-// import styles from './styles';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, Button, TouchableOpacity,Pressable, Image, Modal } from 'react-native';
+// import { launchImageLibrary } from 'react-native-image-picker';
+import DateTimePicker from '@react-native-community/datetimepicker';// import DateTimePicker from '@react-native-community/datetimepicker';
+import * as ImagePicker from 'expo-image-picker';
+import female1 from '../assets/images/onboarding/female1.png'
+import ImageViewer from '../components/ImageViewer';
 
 const ProfileScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
@@ -10,19 +12,46 @@ const ProfileScreen = ({ navigation }) => {
   const [birthday, setBirthday] = useState('');
   const [isCalendarVisible, setCalendarVisible] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const selectProfileImage = () => {
-    launchImageLibrary({ mediaType: 'photo' }, (response) => {
-      if (response.assets && response.assets.length > 0) {
-        setProfileImage(response.assets[0].uri);
-      }
+  //Birthdate calendar
+  const [date, setDate] = useState(new Date(1598051730000));
+  const [mode, setMode] = useState('date');
+  const [show, setShow] = useState(false);
+
+  const onChange = (event, selectedDate) => {
+    const currentDate = selectedDate;
+    setShow(false);
+    setDate(currentDate);
+  };
+
+  const showMode = (currentMode) => {
+    setShow(true);
+    setMode(currentMode);
+  };
+
+  const showDatepicker = () => {
+    showMode('date');
+  };
+
+
+  //Image Picker
+  const pickImageAsync = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
     });
-  };
 
-  const handleDayPress = (day) => {
-    setBirthday(day.dateString);
-    setCalendarVisible(false);
+    if (!result.canceled) {
+      console.log(result);
+      setSelectedImage(result.assets[0].uri)
+    } else {
+      alert('You did not select any image.');
+    }
   };
+  
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -33,12 +62,11 @@ const ProfileScreen = ({ navigation }) => {
           </Text>
         </Pressable>
         <Text style={styles.profileTitle}>Profile details</Text>
-        <TouchableOpacity style={styles.profileImageContainer} onPress={selectProfileImage}>
-          <Image
-            source={profileImage ? { uri: profileImage } : require('../assets/images/onboarding/female1.png')}
-            style={styles.profileImage}
-            resizeMode='cover'
-          />
+        <TouchableOpacity style={styles.profileImageContainer} onPress={pickImageAsync}>
+        <ImageViewer
+          placeholderImageSource={female1}
+          selectedImage={selectedImage}
+        />
           <View style={styles.profileImageOverlay}>
             <Text style={styles.profileImageText}>+</Text>
           </View>
@@ -55,22 +83,21 @@ const ProfileScreen = ({ navigation }) => {
           value={lastName}
           onChangeText={setLastName}
         />
-        <TouchableOpacity style={styles.birthdayButton} onPress={() => setCalendarVisible(true)}>
+        <TouchableOpacity style={styles.birthdayButton} onPress={showDatepicker}>
           <Text style={styles.birthdayButtonText}>
-            {birthday ? birthday : 'Choose birthday date'}
+            Birthday-
+          {date.toLocaleDateString()}
+          {show && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={date}
+              mode={mode}
+              is24Hour={true}
+              onChange={onChange}
+            />
+          )}
           </Text>
         </TouchableOpacity>
-        {/* <Modal visible={isCalendarVisible} transparent={true} animationType="slide">
-          <View style={styles.calendarModal}>
-            <Calendar
-              onDayPress={handleDayPress}
-              markedDates={{ [birthday]: { selected: true, marked: true, selectedColor: '#FF5733' } }}
-            />
-            <TouchableOpacity style={styles.closeButton} onPress={() => setCalendarVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal> */}
         <TouchableOpacity style={styles.confirmButton} onPress={() => navigation.navigate('Gender')}>
           <Text style={styles.profilebuttonText}>Confirm</Text>
         </TouchableOpacity>
@@ -135,17 +162,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold'
   },
   birthdayButton: {
-    backgroundColor: '#F8D7DA',
+    backgroundColor: '#FDECEE',
     paddingVertical: 15,
-    paddingHorizontal: 20,
-    borderRadius: 25,
+    paddingHorizontal: 0,
+    borderRadius: 15,
     alignItems: 'center',
-    marginBottom: 20,
-    width: '100%',
+    marginTop: 0,
+    width: '100%'
   },
   birthdayButtonText: {
     color: '#E94057',
     fontSize: 16,
+    fontFamily: 'Poppins-Bold'
   },
   confirmButton: {
     backgroundColor: '#E94057',
@@ -164,19 +192,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-  },
-  birthdayButton: {
-    backgroundColor: '#FDECEE',
-    paddingVertical: 15,
-    paddingHorizontal: 0,
-    borderRadius: 15,
-    alignItems: 'center',
-    marginTop: 0,
-    width: '100%'
-  },
-  birthdayButtonText: {
-    color: '#E94057',
-    fontSize: 16,
-    fontFamily: 'Poppins-Bold'
   }
 })

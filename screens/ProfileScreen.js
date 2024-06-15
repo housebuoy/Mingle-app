@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, Button, TouchableOpacity,Pressable, Image, Modal } from 'react-native';
+import React, { useState} from 'react';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity,Pressable, Image, Modal } from 'react-native';
 // import { launchImageLibrary } from 'react-native-image-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';// import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import female1 from '../assets/images/onboarding/female1.png'
+import calendar from '../assets/images/calendar-solid-24.png'
 import ImageViewer from '../components/ImageViewer';
 
 const ProfileScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [birthday, setBirthday] = useState('');
-  const [isCalendarVisible, setCalendarVisible] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
+  const [lastName, setLastName] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
 
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+
   //Birthdate calendar
-  const [date, setDate] = useState(new Date(1598051730000));
+  const [date, setDate] = useState(null);
   const [mode, setMode] = useState('date');
   const [show, setShow] = useState(false);
 
@@ -46,8 +47,14 @@ const ProfileScreen = ({ navigation }) => {
     if (!result.canceled) {
       console.log(result);
       setSelectedImage(result.assets[0].uri)
+      setModalVisible(false);
     } else {
-      alert('You did not select any image.');
+      setModalMessage("You didn't add a profile pic");
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 1000);
+    return true;
     }
   };
   
@@ -56,7 +63,7 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centeredContainer}>
-      <Pressable style={{alignSelf: 'flex-end', }}>
+      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('Gender')}>
           <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, color: "#E94057", lineHeight: 25, marginTop: -100 }}>
             Skip
           </Text>
@@ -84,24 +91,38 @@ const ProfileScreen = ({ navigation }) => {
           onChangeText={setLastName}
         />
         <TouchableOpacity style={styles.birthdayButton} onPress={showDatepicker}>
+          <Image source={calendar} style={{width: 18, height: 18}}/>
           <Text style={styles.birthdayButtonText}>
-            Birthday-
-          {date.toLocaleDateString()}
-          {show && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode={mode}
-              is24Hour={true}
-              onChange={onChange}
-            />
-          )}
+            {date ? date.toLocaleDateString() : 'Choose Birthday' }
+            {show && (
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={date || new Date()}
+                mode={mode}
+                is24Hour={true}
+                onChange={onChange}
+              />
+            )}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.confirmButton} onPress={() => navigation.navigate('Gender')}>
           <Text style={styles.profilebuttonText}>Confirm</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+            setModalVisible(false);
+        }}
+      >
+      <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+              <Text style={styles.modalText}>{modalMessage}</Text>
+          </View>
+      </View>
+    </Modal>
     </SafeAreaView>
   );
 };
@@ -132,6 +153,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 50,
+    // borderTopLeftRadius: 20,
   },
   profileImageOverlay: {
     position: 'absolute',
@@ -140,13 +162,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#E94057',
     width: 30,
     height: 30,
+    borderColor: 'white',
+    borderWidth: 1,
     borderRadius: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
   profileImageText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'Poppins-Bold'
   },
   profileinput: {
@@ -168,7 +192,10 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: 'center',
     marginTop: 0,
-    width: '100%'
+    width: '100%',
+    justifyContent : "center",
+    flexDirection: 'row',
+    gap: 10
   },
   birthdayButtonText: {
     color: '#E94057',
@@ -192,5 +219,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-  }
+  },
+  modalView: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 })

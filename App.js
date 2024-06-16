@@ -18,6 +18,8 @@ import firebase from 'firebase/compat/app';
 import GenderScreen from './screens/GenderScreen.js';
 import InterestsScreen from './screens/InterestsScreen.js';
 import EnableLocationScreen from './screens/EnableLocationScreen.js';
+import SearchFriendsScreen from './screens/SearchFriendsScreen.js';
+import AllowNotificationScreen from './screens/AllowNotificationsScreen.js';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -109,6 +111,18 @@ export default function App() {
         <Stack.Screen 
           name="EnableLocation" 
           component={EnableLocationScreen}
+          options={{
+            headerShown: false,
+          }} />
+        <Stack.Screen 
+          name="Searchfriend" 
+          component={SearchFriendsScreen}
+          options={{
+            headerShown: false,
+          }} />
+        <Stack.Screen 
+          name="AllowNotification" 
+          component={AllowNotificationScreen}
           options={{
             headerShown: false,
           }} />

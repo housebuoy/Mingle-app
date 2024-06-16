@@ -83,15 +83,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
     paddingHorizontal: 25,
+    justifyContent: 'space-between',
   },
   title: {
     fontSize: 40,
-    // marginVertical: 5,
+    marginVertical: 5,
     fontFamily: 'Poppins-Bold',
     textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 20,
     color: '#666',
     textAlign: 'center', // Center the subtitle text
     // marginTop: 10,
@@ -102,7 +103,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginTop: -2,
+    marginTop: 0,
     paddingHorizontal: 10, // Add padding to make space around the interests
   },
   interestButton: {
@@ -139,6 +140,7 @@ const styles = StyleSheet.create({
   },
   continueButtonText: {
     color: '#fff',
-    fontFamily: 'Poppins-Bold'
+    fontFamily: 'Poppins-Bold',
+    fontSize: 22,
   },
 })

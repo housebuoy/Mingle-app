@@ -68,7 +68,12 @@ const Login = ({ navigation }) => {
               />
             </View>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate('EmailInput')} style={styles.button}>
+          <TouchableOpacity onPress={() => navigation.navigate('EnableLocation')} >
+                <Text style={{}}>
+                    Sign in to Continue
+                </Text>
+            </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('EnableLocation')} style={styles.button}>
                 <Text style={styles.buttonText}>
                     Sign in to Continue
                 </Text>

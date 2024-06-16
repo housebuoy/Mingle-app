@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import locationsvg from '../assets/images/locationsvg.png'
-// import Icon from 'react-native-vector-icons/FontAwesome';
+
 
 const EnableLocationScreen = () => {
   const navigation = useNavigation();
@@ -36,7 +36,7 @@ const EnableLocationScreen = () => {
     try {
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       console.log(location);
-      // navigation.navigate('Searchfriend');  // Navigate to the SearchFriends screen
+      navigation.navigate('Searchfriend');  // Navigate to the SearchFriends screen
     } catch (error) {
       console.error('Error', 'Failed to access location');
     }
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold'
   },
   description: {
-    fontSize: 16,
+    fontSize: 22,
     textAlign: 'center',
     color: '#7d7d7d',
     marginBottom: 40,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontFamily: 'Poppins-Bold',
     textAlign: 'center',
   },

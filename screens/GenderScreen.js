@@ -17,7 +17,7 @@ const GenderScreen = ({ navigation }) => {
             {'<'}
           </Text>
       </Pressable>
-      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('Gender')}>
+      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('Interests')}>
           <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, color: "#E94057", lineHeight: 50, marginTop: -100 }}>
             Skip
           </Text>

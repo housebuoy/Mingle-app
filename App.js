@@ -16,6 +16,7 @@ const Stack = createStackNavigator();
 
 import firebase from 'firebase/compat/app';
 import GenderScreen from './screens/GenderScreen.js';
+import InterestsScreen from './screens/InterestsScreen.js';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -95,6 +96,12 @@ export default function App() {
         <Stack.Screen 
           name="Gender" 
           component={GenderScreen}
+          options={{
+            headerShown: false,
+          }} />
+        <Stack.Screen 
+          name="Interests" 
+          component={InterestsScreen}
           options={{
             headerShown: false,
           }} />

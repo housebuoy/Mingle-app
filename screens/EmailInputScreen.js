@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Modal, Alert, } from 'react-native';
-// import firebase from '../utils/firebaseConfig';
+import app from '../utils/firebaseConfig';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 
 const EmailInputScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -38,6 +39,7 @@ const EmailInputScreen = ({ navigation }) => {
     if (validateForm()) {
     setModalMessage("Check your email to verify and login");
     setModalVisible(true);
+    registerAndLogin()
     setTimeout(() => {
       setModalVisible(false);
       navigation.navigate('SignIn');
@@ -55,6 +57,21 @@ const EmailInputScreen = ({ navigation }) => {
     setModalVisible(false);
     setModalMessage(""); // Optional: Reset the message when closing the modal
   };
+
+  async function registerAndLogin(){
+    try{
+      const auth = getAuth(app);
+      await createUserWithEmailAndPassword(auth, email, password);
+      const response = await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert('success', response.user.uid)
+      return;
+    }
+    catch(error){
+      Alert.alert('something went wrong')
+    }
+  }
+
+
 
 
   return (

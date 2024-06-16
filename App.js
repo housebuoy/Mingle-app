@@ -14,7 +14,7 @@ const Stack = createStackNavigator();
 // import { initializeApp } from "firebase/app";
 // import { onAuthStateChanged } from 'firebase/auth';
 
-import firebase from 'firebase/compat/app';
+// import firebase from 'firebase/compat/app';
 import GenderScreen from './screens/GenderScreen.js';
 import InterestsScreen from './screens/InterestsScreen.js';
 import EnableLocationScreen from './screens/EnableLocationScreen.js';
@@ -24,25 +24,6 @@ import AllowNotificationScreen from './screens/AllowNotificationsScreen.js';
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   fonts()
-  // const firebaseConfig = {
-  //   apiKey: "AIzaSyDixvimHovdeu5raYj4LTnkXH6YVdBOgFg",
-  //   authDomain: "mingle-3b8ec.firebaseapp.com",
-  //   projectId: "mingle-3b8ec",
-  //   storageBucket: "mingle-3b8ec.appspot.com",
-  //   messagingSenderId: "701325819599",
-  //   appId: "1:701325819599:web:3de1e240c8881178f681ba"
-  // };
-
-  // if(firebase.apps.length){
-  //   firebase.initializeApp(firebaseConfig);  
-  // }
-
-  // firebase.onAuthStateChanged(auth, (user) => {
-  //   if (user != null){
-  //     console.log('We are authenticated now!');
-  //   }
-  // })
-
 
   return (
      <NavigationContainer>

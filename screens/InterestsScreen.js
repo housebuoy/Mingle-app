@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Pressable } from 'react-native';
-// import styles from './styles';
 
 const InterestsScreen = ({ navigation }) => {
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -34,11 +33,11 @@ const InterestsScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
 
       <Pressable style={{alignSelf: 'flex-start', }} onPress={() => navigation.goBack()}>
-          <Text style={{fontFamily: 'Poppins-Bold', fontSize: 40, color: "#E94057", lineHeight: 50, marginTop: 50 }}>
+          <Text style={{fontFamily: 'Poppins-Bold', fontSize: 40, color: "#E94057", lineHeight: 50, marginTop: 30 }}>
             {'<'}
           </Text>
       </Pressable>
-      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('Interests')}>
+      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('EnableLocation')}>
           <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, color: "#E94057", lineHeight: 50, marginTop: -50 }}>
             Skip
           </Text>
@@ -69,7 +68,7 @@ const InterestsScreen = ({ navigation }) => {
           selectedInterests.length === 0 && styles.disabledContinueButton
         ]}
         disabled={selectedInterests.length === 0}
-        onPress={() => navigation.navigate('Location')}
+        onPress={() => navigation.navigate('EnableLocation')}
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>

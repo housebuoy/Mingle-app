@@ -68,7 +68,7 @@ const PhoneVerificationScreen = ({ navigation }) => {
               style={[styles.input, styles.codeInput, digit && styles.filledInput]}
               keyboardType="number-pad"
               maxLength={1}
-              placeholder='0'
+              // placeholder='0'
               value={digit}
               onChangeText={(value) => handleChange(index, value)}
             />

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image, Alert, Modal } from 'react-native';
 import apple from '../assets/images/signIcons/apple.png';
 import facebook from '../assets/images/signIcons/facebook.png';
 import google from '../assets/images/signIcons/google.png';
@@ -50,13 +50,27 @@ const Login = ({ navigation }) => {
       if(auth.currentUser !== (null)){
         navigation.navigate('EnableLocation')
       }else{
-        Alert.alert('Something went wrong')
+        setModalMessage("Check your email to reset your password");
+        setModalVisible(true);
+        setTimeout(() => {
+            setModalVisible(false);
+            navigation.navigate('Login')
+          }, 3000);
       }
       
     }catch(error){
-      setValidateMessage(error.message)
+      setModalMessage(error.message);
+        setModalVisible(true);
+        setTimeout(() => {
+            setModalVisible(false);
+          }, 3000);
     }
   }
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setModalMessage(""); // Optional: Reset the message when closing the modal
+  };
 
 
 
@@ -100,7 +114,7 @@ const Login = ({ navigation }) => {
               />
             </View>
           </View>
-          <TouchableOpacity  style={{marginRight: -150, marginVertical: 10,}} onPress={()=>sendPasswordResetEmail(auth, 'samuelmensah4231@gmail.com' ) }>
+          <TouchableOpacity  style={{marginRight: -150, marginVertical: 10,}} onPress={()=>navigation.navigate('ForgotPassword') }>
                 <Text style={{textAlign: 'right', fontFamily: 'Poppins-Bold'}}>
                     Forgot Password?
                 </Text>
@@ -131,6 +145,20 @@ const Login = ({ navigation }) => {
         <Text style={{fontFamily: 'Poppins-Bold', color: "#8D8B8B", marginTop: 24, fontSize: 16, textAlign: 'center'}}>
           Don't have an account? <Text style={styles.signInLink} onPress={login}>Sign Up</Text>
         </Text>
+        <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                closeModal();
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{modalMessage}</Text>
+            </View>
+          </View>
+        </Modal>
       </View>
     </SafeAreaView>
   );
@@ -240,5 +268,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Poppins-Bold',
     fontSize: 18,
-  }
+  },
+  modalView: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 })

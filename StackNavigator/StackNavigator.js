@@ -15,6 +15,7 @@ import InterestsScreen from '../screens/InterestsScreen.js';
 import EnableLocationScreen from '../screens/EnableLocationScreen.js';
 import SearchFriendsScreen from '../screens/SearchFriendsScreen.js';
 import AllowNotificationScreen from '../screens/AllowNotificationsScreen.js';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen.js';
 // import useAuth from '../hooks/useAuth.js';
 
 export default function App() {
@@ -99,6 +100,12 @@ export default function App() {
             <Stack.Screen 
             name="AllowNotification" 
             component={AllowNotificationScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="ForgotPassword" 
+            component={ForgotPasswordScreen}
             options={{
                 headerShown: false,
             }} />

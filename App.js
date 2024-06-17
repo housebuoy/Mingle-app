@@ -1,4 +1,3 @@
-import {useState} from 'react'
 import fonts from './components/Fonts.js';
 import Welcome from './screens/Welcome';
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,111 +10,17 @@ import Login from './screens/Login.js';
 import PhoneVerificationScreen from './screens/PhoneVerificationScreen.js';
 import ProfileScreen from './screens/ProfileScreen.js';
 const Stack = createStackNavigator();
-// import { initializeApp } from "firebase/app";
-// import { onAuthStateChanged } from 'firebase/auth';
-
-// import firebase from 'firebase/compat/app';
-import GenderScreen from './screens/GenderScreen.js';
-import InterestsScreen from './screens/InterestsScreen.js';
-import EnableLocationScreen from './screens/EnableLocationScreen.js';
-import SearchFriendsScreen from './screens/SearchFriendsScreen.js';
-import AllowNotificationScreen from './screens/AllowNotificationsScreen.js';
+import {useState} from 'react'
+import StackNavigator from './StackNavigator/StackNavigator.js'
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   fonts()
 
+
   return (
      <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen 
-          name="Welcome" 
-          component={Welcome}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen 
-          name="Onboarding" 
-          component={Onboarding}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="SignIn" 
-          component={SignIn}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="MobileLogin" 
-          component={MobileLogin}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="EmailInput" 
-          component={EmailInputScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="Login" 
-          component={Login}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="PhoneVerificationScreen" 
-          component={PhoneVerificationScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="Profile" 
-          component={ProfileScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="Gender" 
-          component={GenderScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="Interests" 
-          component={InterestsScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="EnableLocation" 
-          component={EnableLocationScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="Searchfriend" 
-          component={SearchFriendsScreen}
-          options={{
-            headerShown: false,
-          }} />
-        <Stack.Screen 
-          name="AllowNotification" 
-          component={AllowNotificationScreen}
-          options={{
-            headerShown: false,
-          }} />
-      </Stack.Navigator>
+      <StackNavigator />
     </NavigationContainer>
   );}
 
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-// });

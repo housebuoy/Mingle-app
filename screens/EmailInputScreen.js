@@ -42,8 +42,10 @@ const EmailInputScreen = ({ navigation }) => {
     registerAndLogin()
     setTimeout(() => {
       setModalVisible(false);
-      navigation.navigate('SignIn');
+      navigation.navigate('EnableLocation');
     }, 3000);
+
+
     } else {
       setModalMessage("Please fill all required fields!");
       setModalVisible(true);

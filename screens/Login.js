@@ -1,16 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image, Alert } from 'react-native';
 import apple from '../assets/images/signIcons/apple.png';
 import facebook from '../assets/images/signIcons/facebook.png';
 import google from '../assets/images/signIcons/google.png';
 import line from '../assets/images/line.png';
+import {getAuth, signInWithEmailAndPassword, sendPasswordResetEmail} from 'firebase/auth'
 
 const Login = ({ navigation }) => {
+  const auth = getAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [validateMessage, setValidateMessage] = useState('');
   const isFocused = useRef(false);
   const validateEmail = (email) => {
     const regex = /\S+@\S+\.\S+/;
@@ -19,6 +22,7 @@ const Login = ({ navigation }) => {
       return false;
     }
     setEmailError(""); // Clear the error message if the email is valid
+    // login();
     return true;
   };
 
@@ -26,9 +30,40 @@ const Login = ({ navigation }) => {
     return email!== '' && nameValue!== '' && userName!== '' && password!== '';
   };
 
+  const checkUserSign= () =>{
+    console.log(auth.currentUser);
+    
+  }
+
+  async function login(){
+    checkUserSign();
+    if (email === '' || password === ''){
+      setPassword('required filled missing')
+      
+      return;
+    }
+    try{
+      checkUserSign
+      await signInWithEmailAndPassword(auth, email, password)
+      checkUserSign
+      // navigation.navigate('SignIn')
+      if(auth.currentUser !== (null)){
+        navigation.navigate('EnableLocation')
+      }else{
+        Alert.alert('Something went wrong')
+      }
+      
+    }catch(error){
+      setValidateMessage(error.message)
+    }
+  }
+
+
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centeredContainer}>
+        <Text style={{marginTop: 10, color: 'red'}}>{validateMessage}</Text>
         <Text style={styles.signInTitle}>Welcome Back!</Text>
         <Text style={{fontFamily: 'Poppins-Medium', fontSize: 22, color: "#8D8B8B", lineHeight: 25, textAlign: 'left', marginBottom: 20}}>Please sign in to continue</Text>
         <View style={{alignItems: 'center', justifyContent: 'center', width: '100%', gap: 10, marginTop: 10, }}>
@@ -48,10 +83,7 @@ const Login = ({ navigation }) => {
             />
           
           {emailError && <Text style={{color: 'red'}}>{emailError}</Text>}
-          </View>
-        
-
-        
+          </View>        
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>
                 Password
@@ -68,12 +100,12 @@ const Login = ({ navigation }) => {
               />
             </View>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate('EnableLocation')} >
-                <Text style={{}}>
-                    Sign in to Continue
+          <TouchableOpacity  style={{marginRight: -150, marginVertical: 10,}} onPress={()=>sendPasswordResetEmail(auth, 'samuelmensah4231@gmail.com' ) }>
+                <Text style={{textAlign: 'right', fontFamily: 'Poppins-Bold'}}>
+                    Forgot Password?
                 </Text>
             </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('EnableLocation')} style={styles.button}>
+          <TouchableOpacity onPress={login} style={styles.button}>
                 <Text style={styles.buttonText}>
                     Sign in to Continue
                 </Text>
@@ -97,7 +129,7 @@ const Login = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         <Text style={{fontFamily: 'Poppins-Bold', color: "#8D8B8B", marginTop: 24, fontSize: 16, textAlign: 'center'}}>
-          Don't have an account? <Text style={styles.signInLink} onPress={() => navigation.navigate('SignIn')}>Sign Up</Text>
+          Don't have an account? <Text style={styles.signInLink} onPress={login}>Sign Up</Text>
         </Text>
       </View>
     </SafeAreaView>

@@ -2,6 +2,10 @@ import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Modal, Alert, } from 'react-native';
 import app from '../utils/firebaseConfig';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import { doc, setDoc } from "firebase/firestore"; 
+import 'firebase/firestore';
+import { db } from '../utils/firebaseConfig'
 
 const EmailInputScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -44,15 +48,13 @@ const EmailInputScreen = ({ navigation }) => {
       setModalVisible(false);
       navigation.navigate('EnableLocation');
     }, 3000);
-
-
     } else {
       setModalMessage("Please fill all required fields!");
       setModalVisible(true);
       setTimeout(() => {
         setModalVisible(false);
       }, 1000);
-    }
+    } 
   };
 
   const closeModal = () => {
@@ -60,12 +62,27 @@ const EmailInputScreen = ({ navigation }) => {
     setModalMessage(""); // Optional: Reset the message when closing the modal
   };
 
+const storeUserData = () => {
+  setDoc(doc(db, "users", email), {
+    username: userName,
+    name: nameValue,
+    email: email,
+  })
+  .then(() => {
+    console.log('User data submitted');
+  })
+  .catch((error) => {
+    console.log(error);
+  });
+}
+
   async function registerAndLogin(){
     try{
       const auth = getAuth(app);
       await createUserWithEmailAndPassword(auth, email, password);
       const response = await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('success', response.user.uid)
+      storeUserData();
       return;
     }
     catch(error){

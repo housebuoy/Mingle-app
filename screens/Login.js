@@ -5,6 +5,7 @@ import facebook from '../assets/images/signIcons/facebook.png';
 import google from '../assets/images/signIcons/google.png';
 import line from '../assets/images/line.png';
 import {getAuth, signInWithEmailAndPassword, sendPasswordResetEmail} from 'firebase/auth'
+import SignIn from './SignIn';
 
 const Login = ({ navigation }) => {
   const auth = getAuth();
@@ -143,7 +144,7 @@ const Login = ({ navigation }) => {
           </TouchableOpacity>
         </View>
         <Text style={{fontFamily: 'Poppins-Bold', color: "#8D8B8B", marginTop: 24, fontSize: 16, textAlign: 'center'}}>
-          Don't have an account? <Text style={styles.signInLink} onPress={login}>Sign Up</Text>
+          Don't have an account? <Text style={styles.signInLink} onPress={() => navigation.navigate('SignIn')}>Sign Up</Text>
         </Text>
         <Modal
               animationType="fade"

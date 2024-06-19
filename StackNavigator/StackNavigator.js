@@ -1,5 +1,4 @@
 import {useState} from 'react'
-// import fonts from './components/Fonts.js';
 import Welcome from '../screens/Welcome';
 import { createStackNavigator } from '@react-navigation/stack';
 import Onboarding from '../screens/Onboarding';
@@ -16,11 +15,9 @@ import EnableLocationScreen from '../screens/EnableLocationScreen.js';
 import SearchFriendsScreen from '../screens/SearchFriendsScreen.js';
 import AllowNotificationScreen from '../screens/AllowNotificationsScreen.js';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen.js';
-// import useAuth from '../hooks/useAuth.js';
+import HomeScreen from '../screens/HomeScreen.js';
 
 export default function App() {
-//   const {user} = useAuth()
-//   fonts()
 
   return (
       <Stack.Navigator initialRouteName="Welcome">
@@ -106,6 +103,12 @@ export default function App() {
             <Stack.Screen 
             name="ForgotPassword" 
             component={ForgotPasswordScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="Home" 
+            component={HomeScreen}
             options={{
                 headerShown: false,
             }} />

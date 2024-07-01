@@ -8,6 +8,7 @@ const fonts = () => {
         'GrandHotel-Regular': require('../assets/fonts/GrandHotel-Regular.ttf'),
         'Poppins-Medium': require('../assets/fonts/Poppins/Poppins-Medium.ttf'), 
         'Poppins-Bold': require('../assets/fonts/Poppins/Poppins-Bold.ttf'),
+        'Poppins-ExtraBold': require('../assets/fonts/Poppins/Poppins-ExtraBold.ttf'),
     });
     
       const onLayoutRootView = useCallback(async () => {

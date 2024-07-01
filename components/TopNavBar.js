@@ -45,12 +45,8 @@ const styles = StyleSheet.create({
         borderColor: '#E8E6EA',
         borderRadius: 10,
       },
-      topMidNav: {
-        // flex: 1,
-        // alignSelf: 'flex-end'
-      },
       topMidNavText: {
-        fontFamily: "Poppins-Bold",
-        fontSize: 25
+        fontFamily: "Poppins-ExtraBold",
+        fontSize: 28
       }
 })

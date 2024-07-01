@@ -12,6 +12,8 @@ import ProfileScreen from './screens/ProfileScreen.js';
 const Stack = createStackNavigator();
 import {useState} from 'react'
 import StackNavigator from './StackNavigator/StackNavigator.js'
+import { AuthProvider } from './hooks/useAuth.js';
+
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -19,8 +21,12 @@ export default function App() {
 
 
   return (
-     <NavigationContainer>
-      <StackNavigator />
-    </NavigationContainer>
+    
+      <NavigationContainer>
+        <AuthProvider>
+        <StackNavigator />
+        </AuthProvider>
+      </NavigationContainer>
+    
   );}
 

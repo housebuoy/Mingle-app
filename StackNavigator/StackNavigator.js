@@ -16,11 +16,15 @@ import SearchFriendsScreen from '../screens/SearchFriendsScreen.js';
 import AllowNotificationScreen from '../screens/AllowNotificationsScreen.js';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen.js';
 import HomeScreen from '../screens/HomeScreen.js';
+import useAuth from '../hooks/useAuth.js';
 
 export default function App() {
 
+    const {user} = useAuth()
   return (
       <Stack.Navigator initialRouteName="Welcome">
+        {user ? (
+            <>
             <Stack.Screen 
             name="Welcome" 
             component={Welcome}
@@ -106,12 +110,14 @@ export default function App() {
             options={{
                 headerShown: false,
             }} />
+            </>
+            ) : (
             <Stack.Screen 
             name="Home" 
             component={HomeScreen}
             options={{
                 headerShown: false,
-            }} />
+            }} />)}
       </Stack.Navigator>
   );
 }

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StatusBar, Image, StyleSheet, TouchableOpacity, SafeAreaView, TextInput, Pressable, Modal } from 'react-native';
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import app from '../utils/firebaseConfig';
+
 
 const MobileLogin = ({navigation}) => {
     const [mobileNumber, setMobileNumber] = useState('');
@@ -18,7 +21,7 @@ const MobileLogin = ({navigation}) => {
         }else{
             setTimeout(() => {
                 setModalVisible(false);
-                navigation.navigate('PhoneVerificationScreen');
+                // navigation.navigate('PhoneVerificationScreen');
               }, 1000);
             return true;
         }
@@ -28,6 +31,7 @@ const MobileLogin = ({navigation}) => {
         if (validateMobileNumberFormat(mobileNumber)) {
             console.log('Mobile Number:', mobileNumber);
             verifyMobileNumber(mobileNumber);
+            navigation.navigate('PhoneVerificationScreen', { mobileNumber });
         }
     };
 
@@ -35,6 +39,7 @@ const MobileLogin = ({navigation}) => {
         console.log('Verifying mobile number:', number);
         console.log('Mobile number verified successfully!');
     };
+
 
     return (
         <SafeAreaView style={styles.container}>

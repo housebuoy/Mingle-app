@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Modal } from 'react-native';
+import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import app from '../utils/firebaseConfig';
 
 
 const PhoneVerificationScreen = ({ navigation }) => {
@@ -54,6 +56,49 @@ const PhoneVerificationScreen = ({ navigation }) => {
     }
   };
 
+  useEffect(() => {
+    const auth = getAuth(app);
+    window.recaptchaVerifier = new RecaptchaVerifier(
+      'recaptcha-container',
+      {
+        size: 'normal',
+        callback: (response) => {
+          // reCAPTCHA solved, allow signInWithPhoneNumber
+          handleSignInWithPhoneNumber();
+        },
+        'expired-callback': () => {
+          // Response expired. Ask user to solve reCAPTCHA again.
+          window.recaptchaVerifier.render().then((widgetId) => {
+            window.recaptchaVerifier.reset(widgetId);
+          });
+        },
+      },
+      auth
+    );
+  }, []);
+
+  const handleSignInWithPhoneNumber = async () => {
+    try {
+      const confirmationResult = await signInWithPhoneNumber(
+        auth,
+        route.params.mobileNumber,
+        window.recaptchaVerifier
+      );
+      // User is now signed in
+      navigation.navigate('HomeScreen');
+    } catch (error) {
+      console.error('Error signing in with phone number:', error);
+      setModalMessage('Error verifying phone number. Please try again.');
+      setModalVisible(true);
+    }
+  };
+
+  const handleVerify = () => {
+    if (validateCodeInputs()) {
+      handleSignInWithPhoneNumber();
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centeredContainer}>
@@ -75,10 +120,7 @@ const PhoneVerificationScreen = ({ navigation }) => {
           ))}
         </View>
         <TouchableOpacity onPress={() => {
-          if (validateCodeInputs()) {
-            // Proceed with verification since all inputs are filled
-            navigation.navigate('Profile'); // Or whatever your next step is
-          }
+          handleVerify
           }} style={styles.button}>
           <Text style={styles.buttonText}>
               Verify

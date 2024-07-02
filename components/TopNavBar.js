@@ -6,9 +6,9 @@ import React from 'react'
 const TopNavBar = ({title, handlePress}) => {
   return (
     <View style={styles.topNav}>        
-        <TouchableOpacity style={styles.topLeftNav}>
-          <Image source={right} style={styles.subImage} resizeMode="cover"/>
-        </TouchableOpacity>
+        <View style={styles.topLeftNav}>
+        <Text style={{fontFamily: 'Poppins-Medium', textAlign: 'center', fontSize: 18, color:'#767474'}}>Chicago</Text>
+        </View>
         <View>
           <Text style={styles.topMidNavText}>{title}</Text>
         </View>
@@ -28,15 +28,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        gap: 70,
+        gap: 40,
         paddingBottom: 4,
+        paddingVertical: 10
       },
       topLeftNav: {
         paddingVertical: 8,
         paddingHorizontal: 8,
-        borderWidth: 1,
-        borderColor: '#E8E6EA',
-        borderRadius: 10,
       },
       topRightNav: {
         paddingVertical: 8,

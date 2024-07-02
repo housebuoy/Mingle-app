@@ -1,12 +1,14 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal } from 'react-native';
-import Slider from '@react-native-community/slider';
+// import Slider from '@react-native-community/slider';
+import { Slider } from '@rneui/themed';
 import React, {useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import TopNavBar from '../components/TopNavBar';
 import DiscoverCard from '../components/DiscoverCard';
 import BottomNavBar from '../components/BottomNavBar';
 
-const HomeScreen = () => {
+
+const HomeScreen = ({navigation}) => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -33,12 +35,18 @@ const HomeScreen = () => {
   const handleDistanceChange = (value) => {
     setDistance(value);
   };
+
+  const [ageRange, setAgeRange] = useState(18);
+
+  const handleAgeRangeChange = (value) => {
+    setAgeRange(value);
+  };
   
   return (
     <SafeAreaView style={styles.container}>
       <TopNavBar title="Discover" handlePress={toggleModal}/>
       <DiscoverCard />
-      <BottomNavBar />
+      <BottomNavBar navigation={navigation}/>
 
       <Modal
         animationType="slide"
@@ -94,23 +102,48 @@ const HomeScreen = () => {
               </View>
             </View>
             <View style={styles.distanceContainer}>
-              <Text style={styles.label}>Distance: {distance} km</Text>
-              <Slider
-                style={styles.slider}
-                minimumValue={0}
-                maximumValue={500}
-                value={distance}
-                onValueChange={handleDistanceChange}
-                minimumTrackTintColor="#e94057"
-                maximumTrackTintColor="#ddd"
-                thumbTintColor="#e94057"
-              />
+              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                <Text style={styles.genderConfigHead}>Distance</Text>
+                <Text style={styles.label}>{distance} km</Text>
+              </View>
+                <Slider
+                  style={styles.slider}
+                  value={distance}
+                  onValueChange={handleDistanceChange}
+                  minimumValue={0}
+                  maximumValue={100}
+                  step={1}
+                  thumbStyle={styles.thumb}
+                  trackStyle={styles.track}
+                  thumbTintColor='#e94057'
+                  minimumTrackTintColor ='#e94057'
+                  maximumTrackTintColor ='#ddd'
+                />
             </View>
-            <TouchableOpacity onPress={toggleModal}>
-              <Text style={styles.closeButton}>Close</Text>
+            <View style={styles.distanceContainer}>
+              <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
+                <Text style={styles.genderConfigHead}>Age</Text>
+                <Text style={styles.label}>{ageRange} yrs</Text>
+              </View>
+                <Slider
+                  style={styles.slider}
+                  value={ageRange}
+                  onValueChange={handleAgeRangeChange}
+                  minimumValue={0}
+                  maximumValue={150}
+                  step={1}
+                  thumbStyle={styles.thumb}
+                  trackStyle={styles.track}
+                  thumbTintColor='#e94057'
+                  minimumTrackTintColor ='#e94057'
+                  maximumTrackTintColor ='#ddd'
+                />
+            </View>
+            <TouchableOpacity onPress={toggleModal} style={styles.continueButton}>
+              <Text style={styles.closeButton}>Continue</Text>
             </TouchableOpacity>
+            </View>
           </View>
-        </View>
       </Modal>
     </SafeAreaView>
   )
@@ -122,8 +155,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'space-between',
-    marginTop: 20,
-    gap: 5
+    marginTop: 5,
   },
   modalContainer: {
     flex: 1,
@@ -134,14 +166,23 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: 'white',
     padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
     width: '100%',
   },
+  continueButton: { 
+    backgroundColor: '#e94057',
+    paddingVertical: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    marginTop: 40
+  },
   closeButton: {
-    color: 'blue',
-    textAlign: 'right',
-    marginTop: 10,
+    color: '#fff',
+    textAlign: 'center',
+    fontFamily: 'Poppins-Bold',
+    fontSize: 22,
   },
   contentHeading: {
     fontFamily: 'Poppins-Bold',
@@ -169,27 +210,27 @@ const styles = StyleSheet.create({
     borderColor: '#dfdfdf',
     alignItems: 'center',
     justifyContent: 'space-evenly',
-    // paddingVertical: 10,
+    marginTop: 10,
     borderRadius: 10,
   },
   genderConfigHead:{
     fontFamily: 'Poppins-Bold',
     fontSize: 20,
-
+    marginTop: 5,
   },
   maleButtonText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-Bold',
     fontSize: 20,
     flex: 1,
     textAlign: 'center',
   },
   femaleButtonText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-Bold',
     fontSize: 20,
     textAlign: 'center',
   },
   allButtonText: {
-    fontFamily: 'Poppins-Medium',
+    fontFamily: 'Poppins-Bold',
     fontSize: 20,
     textAlign: 'center',
   },
@@ -224,5 +265,22 @@ const styles = StyleSheet.create({
   activeButtonText:{
     color: '#fff'
   },
-
+  label: {
+    fontFamily: 'Poppins-Bold',
+    color: '#B1B1B1',
+    fontSize: 18,
+  },
+  thumb: {
+    width: 30,
+    height: 30,
+    borderWidth: 4,
+    borderColor: '#f1efef'
+  },
+  track: {
+    height: 8,
+    borderRadius: 10,
+  },
+  distanceContainer: {
+    marginTop: 25,
+  }
 })

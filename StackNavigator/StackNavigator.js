@@ -17,6 +17,7 @@ import AllowNotificationScreen from '../screens/AllowNotificationsScreen.js';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen.js';
 import HomeScreen from '../screens/HomeScreen.js';
 import useAuth from '../hooks/useAuth.js';
+import MatchScreen from '../screens/MatchScreen.js';
 
 export default function App() {
 
@@ -113,6 +114,12 @@ export default function App() {
             <Stack.Screen 
             name="Home" 
             component={HomeScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="Matches" 
+            component={MatchScreen}
             options={{
                 headerShown: false,
             }} />

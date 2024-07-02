@@ -125,7 +125,7 @@ export default DiscoverCard
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        flexDirection: 'column'
+        flexDirection: 'column',
       },
       card: {
         borderRadius: 10,
@@ -173,13 +173,12 @@ const styles = StyleSheet.create({
       },
       actionButtons: {
         flexDirection: 'row',
-        justifyContent: 'space-around',
+        justifyContent: 'center',
         width: '100%',
         paddingVertical: 20,
-        // borderTopWidth: 1,
-        // borderTopColor: '#eee',
         position: 'absolute',
-        bottom: -5,
+        bottom: 10,
+        gap: 10,
       },
       actionButton: {
         width: 50,

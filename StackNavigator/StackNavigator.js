@@ -20,11 +20,11 @@ import useAuth from '../hooks/useAuth.js';
 
 export default function App() {
 
-    const {user} = useAuth()
+    // const {user} = useAuth()
   return (
-      <Stack.Navigator initialRouteName="Welcome">
-        {user ? (
-            <>
+      <Stack.Navigator
+       initialRouteName="Welcome"
+       >
             <Stack.Screen 
             name="Welcome" 
             component={Welcome}
@@ -110,14 +110,12 @@ export default function App() {
             options={{
                 headerShown: false,
             }} />
-            </>
-            ) : (
             <Stack.Screen 
             name="Home" 
             component={HomeScreen}
             options={{
                 headerShown: false,
-            }} />)}
+            }} />
       </Stack.Navigator>
   );
 }

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
+import { StyleSheet, Text, View, Image, TouchableOpacity, Modal } from 'react-native'
 import React, { useState, useRef } from 'react'
 import woman from '../assets/images/photo.png';
 import Swiper from 'react-native-deck-swiper';
@@ -21,7 +21,7 @@ const DiscoverCard = () => {
           age: 27,
           profession: 'Graphic Designer',
           distance: '2 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
+          image: require('../assets/images/photo2.png'), // Replace with actual image URL
         },
         {
           id: '3',
@@ -73,7 +73,7 @@ const DiscoverCard = () => {
               <Text style={styles.name}>{user.name}, {user.age}</Text>
               <Text style={styles.profession}>{user.profession}</Text>
               <View style={styles.distanceContainer}>
-                <Icon name="location-on" size={18} color="#888" />
+                <Icon name="location-on" size={18} color="#aeadad" />
                 <Text style={styles.distance}>{user.distance}</Text>
               </View>
             </View>
@@ -86,6 +86,7 @@ const DiscoverCard = () => {
     
       return (
         <View style={styles.container}>
+        <View >
           <Swiper
             ref={swiperRef}
             cards={users}
@@ -97,8 +98,24 @@ const DiscoverCard = () => {
             backgroundColor={'#f8f8f8'}
             stackSize={3}
             showSecondCard={true}
-            // infinite
+            infinite
           />
+        </View>
+        <View style={styles.actionButtons}>
+            <TouchableOpacity onPress={() => swiperRef.current.swipeLeft()} style={styles.actionButton}>
+              <Icon name="close" type="material" size={35} color="#ff6b6b" />
+            </TouchableOpacity>
+            <View style={styles.heartButtonContainer}>
+              <TouchableOpacity onPress={() => swiperRef.current.swipeRight()} style={styles.heartButton}>
+                <Icon name="favorite" type="material" size={50} color="#fff" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.heartButtonContainer}>
+              <TouchableOpacity onPress={() => swiperRef.current.swipeTop()} style={styles.actionButton}>
+                <Icon name="star" type="material" size={35} color="#8a2387" />
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       );
     };
@@ -108,19 +125,21 @@ export default DiscoverCard
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        flexDirection: 'column'
       },
       card: {
-         borderRadius: 10,
-        borderWidth: 2,
-        borderColor: '#E8E6EA',
+        borderRadius: 10,
         justifyContent: 'center',
         backgroundColor: 'white',
-        width: '100%'
+        width: '100%',
+        height: 450,
       },
       image: {
-        // flex: 1,
+        flex: 1,
         resizeMode: 'cover',
         borderRadius: 10,
+        width: '100%',
+        height: '100%'
       },
       infoContainer: {
         position: 'absolute',
@@ -130,6 +149,8 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: 'rgba(0,0,0,0.5)',
         alignItems: 'flex-start',
+        borderBottomStartRadius: 20,
+        borderBottomEndRadius: 20,
       },
       name: {
         fontSize: 24,
@@ -149,5 +170,46 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#fff',
         marginLeft: 5,
+      },
+      actionButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '100%',
+        paddingVertical: 20,
+        // borderTopWidth: 1,
+        // borderTopColor: '#eee',
+        position: 'absolute',
+        bottom: -5,
+      },
+      actionButton: {
+        width: 50,
+        height: 50,
+        borderRadius: 20,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 5 },
+        shadowRadius: 10,
+        elevation: 5,
+
+      },
+      heartButtonContainer: {
+        alignItems: 'center',
+        position: 'relative',
+      },
+      heartButton: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#ff6b6b',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 5 },
+        shadowRadius: 10,
+        elevation: 5,
       },
 })

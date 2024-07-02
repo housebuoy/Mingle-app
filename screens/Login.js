@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image, Alert, Modal } from 'react-native';
 import apple from '../assets/images/signIcons/apple.png';
 import facebook from '../assets/images/signIcons/facebook.png';
@@ -6,6 +6,7 @@ import google from '../assets/images/signIcons/google.png';
 import line from '../assets/images/line.png';
 import {getAuth, signInWithEmailAndPassword, sendPasswordResetEmail} from 'firebase/auth'
 import SignIn from './SignIn';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = ({ navigation }) => {
   const auth = getAuth();
@@ -16,6 +17,24 @@ const Login = ({ navigation }) => {
   const [emailError, setEmailError] = useState('');
   const [validateMessage, setValidateMessage] = useState('');
   const isFocused = useRef(false);
+
+
+  
+  useEffect(() => {
+    const checkUserLogin = async () => {
+      try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        if (userToken !== null) {
+          // User is already logged in, navigate to the Home screen
+          navigation.navigate('Home');
+        }
+      } catch (error) {
+        console.error('Error checking user login:', error);
+      }
+    };
+    checkUserLogin();
+  }, [navigation]);
+
   const validateEmail = (email) => {
     const regex = /\S+@\S+\.\S+/;
     if (!regex.test(email)) {
@@ -23,50 +42,53 @@ const Login = ({ navigation }) => {
       return false;
     }
     setEmailError(""); // Clear the error message if the email is valid
-    // login();
     return true;
   };
 
   const validateForm = () => {
-    return email!== '' && nameValue!== '' && userName!== '' && password!== '';
+    return email !== '' && password !== '';
   };
 
-  const checkUserSign= () =>{
-    console.log(auth.currentUser);
-    
-  }
-
-  async function login(){
-    checkUserSign();
-    if (email === '' || password === ''){
-      setPassword('required filled missing')
-      
+  async function login() {
+    if (email === '' || password === '') {
+      setModalMessage("Please enter your email and password.");
+      setModalVisible(true);
       return;
     }
-    try{
-      checkUserSign
-      await signInWithEmailAndPassword(auth, email, password)
-      checkUserSign
-      // navigation.navigate('SignIn')
-      if(auth.currentUser !== (null)){
-        navigation.navigate('EnableLocation')
-      }else{
-        setModalMessage("Check your email to reset your password");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      if (auth.currentUser !== null) {
+        // Store the user's login token in AsyncStorage
+        await AsyncStorage.setItem('userToken', auth.currentUser.uid);
+        navigation.navigate('Home');
+      } else {
+        setModalMessage("Check your email to reset your password.");
         setModalVisible(true);
         setTimeout(() => {
-            setModalVisible(false);
-            navigation.navigate('Login')
-          }, 3000);
+          setModalVisible(false);
+          navigation.navigate('Login');
+        }, 3000);
       }
-      
-    }catch(error){
+    } catch (error) {
       setModalMessage(error.message);
-        setModalVisible(true);
-        setTimeout(() => {
-            setModalVisible(false);
-          }, 3000);
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 3000);
     }
   }
+
+  const logout = async () => {
+    try {
+      await signOut(auth);
+      // Remove the user's login token from AsyncStorage
+      await AsyncStorage.removeItem('userToken');
+      navigation.navigate('Login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const closeModal = () => {
     setModalVisible(false);

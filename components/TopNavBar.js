@@ -3,16 +3,16 @@ import right from '../assets/images/icons/right.png';
 import setting from '../assets/images/icons/setting-config.png';
 import React from 'react'
 
-const TopNavBar = ({title}) => {
+const TopNavBar = ({title, handlePress}) => {
   return (
     <View style={styles.topNav}>        
         <TouchableOpacity style={styles.topLeftNav}>
           <Image source={right} style={styles.subImage} resizeMode="cover"/>
         </TouchableOpacity>
-        <View style={styles.topMidNav}>
+        <View>
           <Text style={styles.topMidNavText}>{title}</Text>
         </View>
-        <TouchableOpacity style={styles.topRightNav}>
+        <TouchableOpacity style={styles.topRightNav} onPress={handlePress}>
           <Image source={setting} style={styles.subImage} resizeMode="cover"/>
         </TouchableOpacity>
     </View>
@@ -47,6 +47,6 @@ const styles = StyleSheet.create({
       },
       topMidNavText: {
         fontFamily: "Poppins-ExtraBold",
-        fontSize: 28
+        fontSize: 28,
       }
 })

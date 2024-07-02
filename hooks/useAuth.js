@@ -2,7 +2,7 @@ import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWith
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import app from '../utils/firebaseConfig';
 
-const AuthContext = createContext({});
+const AuthContext = createContext();
 const auth = getAuth(app);
 
 export const AuthProvider = ({ children }) => {
@@ -67,3 +67,13 @@ export const AuthProvider = ({ children }) => {
 export default function useAuth() {
   return useContext(AuthContext);
 }
+
+export const checkUser = ({navigation})=>{
+  if(auth.currentUser !== null){
+    navigation.navigate('Home')
+    console.log('function executed')
+  }else{
+    navigation.navigate('Welcome')
+    console.log('not executed')
+  }
+} 

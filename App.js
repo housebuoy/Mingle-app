@@ -23,9 +23,9 @@ export default function App() {
   return (
     
       <NavigationContainer>
-        <AuthProvider>
+        {/* <AuthProvider> */}
         <StackNavigator />
-        </AuthProvider>
+        {/* </AuthProvider>r */}
       </NavigationContainer>
     
   );}

@@ -8,20 +8,41 @@ import fonts from '../components/Fonts'
 // import * as SplashScreen from 'expo-splash-screen';
 // import { useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
+// import { checkUser } from '../hooks/useAuth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import app from '../utils/firebaseConfig';
+import { getAuth } from '@firebase/auth';
 
 
 
 
 const Welcome = () => {
   fonts()
-    const navigation = useNavigation();
+  const auth = getAuth(app);
 
-    useEffect(() => {
-    const timer = setTimeout(() => {
-        navigation.navigate('Onboarding');
-    }, 3000); // 3000 milliseconds = 3 seconds
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const checkUserToken = async () => {
+      const userToken = await AsyncStorage.getItem('userToken');
+      if (userToken !== null) {
+        // User is already logged in, navigate to the home screen
+        console.log(userToken)
+        const timer = setTimeout(() => {
+          navigation.navigate('Home');
+        }, 3000); // 3000 milliseconds = 3 seconds
         return () => clearTimeout(timer);
-    }, [navigation]);
+      } else {
+        // User is not logged in, navigate to the onboarding screen
+        const timer = setTimeout(() => {
+          navigation.navigate('Onboarding');
+        }, 3000); // 3000 milliseconds = 3 seconds
+        return () => clearTimeout(timer);
+      }
+    };
+    checkUserToken();
+  }, [navigation]);
+
 
   return (
     <View style={styles.container}>

@@ -1,42 +1,40 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useState, useEffect } from 'react';
+import { AsyncStorage, View, Text } from 'react-native';
+import HomeScreen from '../screens/HomeScreen';
+import SignInScreen from './SignInScreen';
 
-const AuthProvider = ({ children }) => {
+const AuthContext = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    loadTokenFromStorage();
+    checkLoginState();
   }, []);
 
-  const login = async (userData) => {
-    setIsLoggedIn(true);
-    setUser(userData);
-    await AsyncStorage.setItem('@auth_token', userData.token); // Save the token
-  };
-
-  const logout = async () => {
-    setIsLoggedIn(false);
-    setUser(null);
-    await AsyncStorage.removeItem('@auth_token'); // Remove the token
-  };
-
-  const loadTokenFromStorage = async () => {
+  const checkLoginState = async () => {
     try {
-      const token = await AsyncStorage.getItem('@auth_token');
-      if (token) {
-        setIsLoggedIn(true);
-        // Optionally, refresh the user object or navigate to the main content of the app
-      }
-    } catch (e) {
-      console.error(e);
+      const isLoggedIn = await AsyncStorage.getItem('isLoggedIn');
+      setIsLoggedIn(isLoggedIn === 'true');
+    } catch (error) {
+      console.error('Error checking login state:', error);
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  const handleSignIn = async () => {
+    try {
+      await AsyncStorage.setItem('isLoggedIn', 'true');
+      setIsLoggedIn(true);
+    } catch (error) {
+      console.error('Error saving login state:', error);
+    }
+  };
 
-export default AuthProvider;
+  const handleSignOut = async () => {
+    try {
+      await AsyncStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+    } catch (error) {
+      console.error('Error removing login state:', error);
+    }
+  };
+}
+  export default AuthContext;

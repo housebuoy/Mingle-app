@@ -6,9 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import TopNavBar from '../components/TopNavBar';
 import DiscoverCard from '../components/DiscoverCard';
 import BottomNavBar from '../components/BottomNavBar';
+import setting from '../assets/images/icons/setting-config.png';
+import cards from '../assets/images/icons/card-solid-36.png';
+import heart from '../assets/images/icons/heart-solid-36.png';
+import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = ({navigation, location}) => {
 
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -44,9 +48,17 @@ const HomeScreen = ({navigation}) => {
   
   return (
     <SafeAreaView style={styles.container}>
-      <TopNavBar title="Discover" handlePress={toggleModal}/>
+      <TopNavBar title="Discover"
+                 iconSource={setting} 
+                 handlePress={toggleModal}
+      />
       <DiscoverCard />
-      <BottomNavBar navigation={navigation}/>
+      <BottomNavBar navigation={navigation} 
+                    cardIcon={cards}
+                    matchIcon={heart}
+                    messageIcon={messages}
+                    location={location}
+      />
 
       <Modal
         animationType="slide"

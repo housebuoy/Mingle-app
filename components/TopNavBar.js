@@ -1,19 +1,17 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import right from '../assets/images/icons/right.png';
-import setting from '../assets/images/icons/setting-config.png';
 import React from 'react'
 
-const TopNavBar = ({title, handlePress}) => {
+const TopNavBar = ({title, iconSource, handlePress}) => {
   return (
     <View style={styles.topNav}>        
-        <View style={styles.topLeftNav}>
-        <Text style={{fontFamily: 'Poppins-Medium', textAlign: 'center', fontSize: 18, color:'#767474'}}>Chicago</Text>
-        </View>
+        {/* <View style={styles.topLeftNav}>
+        </View> */}
         <View>
           <Text style={styles.topMidNavText}>{title}</Text>
         </View>
         <TouchableOpacity style={styles.topRightNav} onPress={handlePress}>
-          <Image source={setting} style={styles.subImage} resizeMode="cover"/>
+          <Image source={iconSource} style={styles.subImage} resizeMode="cover"/>
         </TouchableOpacity>
     </View>
   )
@@ -26,11 +24,12 @@ const styles = StyleSheet.create({
         borderBottomColor: '#E8E6EA',
         borderBottomWidth: 2,
         flexDirection: 'row',
-        justifyContent: 'center',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        gap: 40,
-        paddingBottom: 4,
-        paddingVertical: 10
+        // gap: 60,
+        paddingVertical: 8,
+        paddingHorizontal: 20,
+        backgroundColor: '#fff',
       },
       topLeftNav: {
         paddingVertical: 8,
@@ -44,7 +43,11 @@ const styles = StyleSheet.create({
         borderRadius: 10,
       },
       topMidNavText: {
-        fontFamily: "Poppins-ExtraBold",
-        fontSize: 28,
+        fontFamily: "Poppins-Bold",
+        fontSize: 30,
+      },
+      subImage:{
+        width: 24,
+        height: 24,
       }
 })

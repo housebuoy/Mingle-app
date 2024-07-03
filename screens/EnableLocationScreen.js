@@ -36,11 +36,13 @@ const EnableLocationScreen = () => {
     try {
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       console.log(location);
-      navigation.navigate('Searchfriend');  // Navigate to the SearchFriends screen
+      navigation.navigate('Searchfriend', {art});  // Navigate to the SearchFriends screen
     } catch (error) {
       console.error('Error', 'Failed to access location');
     }
   };
+
+  const art = 'you'
 
   return (
     <View style={styles.container}>

@@ -1,21 +1,33 @@
 import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
-import React from 'react'
-import cards from '../assets/images/icons/card-solid-36.png';
+import React, {useState} from 'react'
 import people from '../assets/images/icons/user.png';
-import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 
-const BottomNavBar = ({navigation}) => {
+
+const BottomNavBar = ({navigation, cardIcon, matchIcon, messageIcon}) => {
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const handlePress = (index) => {
+    if (activeIndex === index) {
+      setActiveIndex(-1); // clear active state
+    } else {
+      setActiveIndex(index);
+    }
+  };
+
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity>
-        <Image source={cards} resizeMode='contain' style={styles.icon}/>
+      <TouchableOpacity onPress={() => navigation.navigate('Home')}>
+        <Image source={cardIcon} resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate('Matches')}>
-        <Image source={heart} resizeMode='contain' style={styles.icon}/>
+      <TouchableOpacity 
+        onPress={() => {navigation.navigate('Matches')}}>
+        <Image source={matchIcon}
+          resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
-      <TouchableOpacity>
-        <Image source={messages} resizeMode='contain' style={styles.icon}/>
+      <TouchableOpacity onPress={() => {navigation.navigate('Messages')}}>
+        <Image source={messageIcon} resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
       <TouchableOpacity>
         <Image source={people} resizeMode='contain' style={styles.icon}/>
@@ -30,12 +42,14 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         backgroundColor: '#FEFEFE',
-        borderTopWidth: 2,
-        borderColor: '#E8E6EA',
+        borderTopWidth: 1,
+        borderColor: '#E94057',
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 2,
-        gap: 45
+        gap: 45,
+        position: 'fixed',
+        bottom: 0,
     },
     icon: {
         width: 35,

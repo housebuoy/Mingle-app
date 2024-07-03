@@ -18,9 +18,10 @@ import ForgotPasswordScreen from '../screens/ForgotPasswordScreen.js';
 import HomeScreen from '../screens/HomeScreen.js';
 import useAuth from '../hooks/useAuth.js';
 import MatchScreen from '../screens/MatchScreen.js';
+import MessageScreen from '../screens/MessageScreen.js';
 
-export default function App() {
-
+export default function App({art}) {
+    console.log(art)
     // const {user} = useAuth()
   return (
       <Stack.Navigator
@@ -116,10 +117,18 @@ export default function App() {
             component={HomeScreen}
             options={{
                 headerShown: false,
-            }} />
+            }} 
+            art={art}
+            />
             <Stack.Screen 
             name="Matches" 
             component={MatchScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="Messages" 
+            component={MessageScreen}
             options={{
                 headerShown: false,
             }} />

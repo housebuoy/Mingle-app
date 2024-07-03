@@ -86,6 +86,9 @@ const DiscoverCard = () => {
     
       return (
         <View style={styles.container}>
+          <View style={{marginBottom: -20, marginTop: 10}}>
+            <Text style={{fontFamily: 'Poppins-Regular', textAlign: 'center', fontSize: 18, color:'#767474'}}>Make new matches by swiping</Text>
+          </View>
         <View >
           <Swiper
             ref={swiperRef}
@@ -126,6 +129,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
+        backgroundColor: '#fff',
+        // justifyContent: 'space-between'
       },
       card: {
         borderRadius: 10,

@@ -273,10 +273,10 @@ const styles = StyleSheet.create({
       },
       userName: {
         fontSize: 18,
-        fontFamily: 'Poppins-Medium'
+        fontFamily: 'Poppins-Bold'
       },
       userText: {
-        fontSize: 18,
+        fontSize: 16,
         fontFamily: 'Poppins-Medium',
         color: '#666',
       },

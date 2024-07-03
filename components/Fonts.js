@@ -10,6 +10,7 @@ const fonts = () => {
         'Poppins-Bold': require('../assets/fonts/Poppins/Poppins-Bold.ttf'),
         'Poppins-ExtraBold': require('../assets/fonts/Poppins/Poppins-ExtraBold.ttf'),
         'Poppins-Regular': require('../assets/fonts/Poppins/Poppins-Regular.ttf'),
+        'Poppins-SemiBold': require('../assets/fonts/Poppins/Poppins-SemiBold.ttf'),
     });
     
       const onLayoutRootView = useCallback(async () => {

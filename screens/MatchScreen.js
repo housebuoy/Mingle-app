@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image, ScrollView, FlatList, Dimensions } from 'react-native'
-import React from 'react'
+import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
 import BottomNavBar from '../components/BottomNavBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import TopNavBar from '../components/TopNavBar'
@@ -7,103 +7,134 @@ import sort from '../assets/images/icons/sort-two.png'
 import cardTrans from '../assets/images/icons/card-solid-trans.png'
 import heartRed from '../assets/images/icons/heart-solid.png'
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
+import { Icon } from '@rneui/themed';
+import { data as users } from '../components/data'
+import { useLikedUsers } from '../hooks/likedUsersContext'
 
 const MatchScreen = ({navigation}) => {
-    const { height } = Dimensions.get('window');
+    const [isPopupVisible, setIsPopupVisible] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(1);
+    const [data, setData] = useState(users)
+    const { likedUsers } = useLikedUsers();
+    const handleActiveIndex = (index) => {
+        if (activeIndex === index) {
+          setActiveIndex(0); // clear active state
+        } else {
+          setActiveIndex(index);
+        }
+      };
 
-    const data = [
-        {
-          id: '1',
-          name: 'Jessica Parker',
-          age: 23,
-          profession: 'Professional model',
-          distance: '1 km',
-          image: require('../assets/images/photo.png'),
-        },
-        {
-          id: '2',
-          name: 'Emily Johnson',
-          age: 27,
-          profession: 'Graphic Designer',
-          distance: '2 km',
-          image: require('../assets/images/photo2.png'), // Replace with actual image URL
-          activity: require('../assets/images/photo1.png'),
-        },
-        {
-          id: '3',
-          name: 'Sophia Williams',
-          age: 22,
-          profession: 'Software Engineer',
-          distance: '1.5 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        {
-          id: '4',
-          name: 'Olivia Brown',
-          age: 25,
-          profession: 'Marketing Specialist',
-          distance: '3 km',
-          image: require('../assets/images/photo3.png'), // Replace with actual image URL
-          activity: require('../assets/images/photo1.png'),
-        },
-        {
-          id: '5',
-          name: 'Ava Davis',
-          age: 24,
-          profession: 'Photographer',
-          distance: '0.5 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        {
-          id: '6',
-          name: 'Ava Davis',
-          age: 24,
-          profession: 'Photographer',
-          distance: '0.5 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        {
-          id: '7',
-          name: 'Ava Davis',
-          age: 24,
-          profession: 'Photographer',
-          distance: '0.5 km',
-          image: require('../assets/images/onboarding/female1.png'),
-          activity: require('../assets/images/photo1.png'), // Replace with actual image URL
-        },
-        // Add more users as needed
-      ];
+      const handleRemove = (id) => {
+        console.log('Removing item with id:', id);  // Log the id to ensure it's correct
+        setData((prevData) => prevData.filter(item => item.id !== id));
+      };
+    
 
       const renderItem = ({ item }) => (
-        <View style={styles.userContainer}>
-          <Image source={item.image} style={styles.userImage} />
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{item.name}</Text>
-            <Text style={styles.userAge}>{item.age}</Text>
-            <Text style={styles.userProfession}>{item.profession}</Text>
-            <Text style={styles.userDistance}>{item.distance}</Text>
-          </View>
-        </View>
+            <TouchableOpacity style={styles.card}>
+                <Image source={item.image} style={styles.image} />
+                <View style={styles.infoContainer}>
+                    <Text style={styles.name}>{item.name.split(' ')[0]}, {item.age}</Text>
+                    {/* <Text style={styles.profession}>{item.profession}</Text> */}
+                    <View style={styles.actionContainer}>
+                        <TouchableOpacity onPress={() => handleRemove(item.id)}>
+                            <Icon name='close'
+                                  type='font-awesome'
+                                  color='#fff'
+                                  size={30}
+                            />
+                        </TouchableOpacity>                        
+                        <TouchableOpacity >
+                        <Icon name='heart'
+                                  type='font-awesome'
+                                  color='#fff'
+                                  size={30}
+                            />
+                        </TouchableOpacity>                        
+                    </View>
+                </View>
+          </TouchableOpacity>
       );
       
   return (
     <SafeAreaView style={styles.container}>
             <TopNavBar title={'Matches'} 
                        iconSource={sort}
+                       handlePress={() => setIsPopupVisible(!isPopupVisible)}
             />
             <View style={{paddingHorizontal: 20, paddingVertical: 10}}>
-                <Text style={{fontFamily: 'Poppins-Regular', textAlign: 'center', fontSize: 18, color:'#767474'}}>This is a list of people who have liked you and your matches.</Text>
+                <Text style={{fontFamily: 'Poppins-SemiBold', textAlign: 'center', fontSize: 18, color:'#767474'}}>This is a list of people who have liked you and your matches.</Text>
             </View>
-            {/* <ScrollView style={styles.scrollContainer}> */}
-            <View style={styles.viewContainer}>
-            <FlatList
-                data={data}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={styles.listContainer}
-                style={styles.flatList}
-            />
-            </View>
+            {isPopupVisible && (
+                <View style={styles.popupContainer}>
+                    <TouchableOpacity style={[
+                            styles.popupButton1,
+                            activeIndex === 0 ? styles.activeButton : null
+                        ]} 
+                        onPress={() => {
+                            setIsPopupVisible(false)
+                            handleActiveIndex(0)
+                        }}>
+                        <Text style={[
+                                styles.popupButtonText,
+                                activeIndex === 0 ? styles.activeButtonText : null
+                            ]}>Matches</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity 
+                        style={[
+                            styles.popupButton2,
+                            activeIndex === 1 ? styles.activeButton : null
+                        ]} 
+                        onPress={() => {
+                            setIsPopupVisible(false)
+                            handleActiveIndex(1)
+                        }}>
+                        <Text style={[
+                                styles.popupButtonText,
+                                activeIndex === 1 ? styles.activeButtonText : null
+                            ]}>Who You Liked</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity                         style={[
+                            styles.popupButton3,
+                            activeIndex === 2 ? styles.activeButton : null
+                        ]} 
+                        onPress={() => {
+                            setIsPopupVisible(false)
+                            handleActiveIndex(2)
+                        }}>
+                        <Text style={[
+                          styles.popupButtonText,
+                          activeIndex === 2 ? styles.activeButtonText : null                          
+                          ]}>Who Liked You</Text>
+                    </TouchableOpacity>
+                </View>
+            )}
+            {activeIndex === 2 ? (
+              <View style={styles.viewContainer}>
+                <FlatList
+                    data={data}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={styles.listContainer}
+                    showsVerticalScrollIndicator= {false}
+                    style={styles.flatList}
+                    numColumns={2}                
+                />
+              </View>
+            ): null}
+            { activeIndex === 1? (
+              <View style={styles.viewContainer}>
+                <FlatList
+                    data={likedUsers.map(id => users.find(user => user.id === id))}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.listContainer}
+                    showsVerticalScrollIndicator= {false}
+                    style={styles.flatList}
+                    numColumns={2}                
+                />
+              </View>
+            ): null}
             <BottomNavBar navigation={navigation} 
                           cardIcon={cardTrans}        
                           matchIcon={heartRed} 
@@ -120,61 +151,97 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
+        backgroundColor: '#fff',
       },
       viewContainer:{
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
+        width: '100%',
       },
-      activityContainer:{
+    
+      card: {
+        borderRadius: 10,
+        justifyContent: 'center',
+        backgroundColor: '#fff',
+        width: '50%',
+        height: 250,
+        alignItems:'center',
+        padding: 4
+      },
+      image: {
         flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
+        resizeMode: 'cover',
+        borderRadius: 10,
+        width: '100%',
+        height: "100%",
       },
-      scrollContainer:{
-        paddingHorizontal: 30,
-        paddingVertical: 20,
-      }, 
-      userContainer: {
+      infoContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 15,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+        backdropFilter: 'blur(10px)',
+        alignItems: 'flex-start',
+        borderBottomStartRadius: 15,
+        borderBottomEndRadius: 15,
+      },
+      actionContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 8,
-        padding: 12,
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
+        justifyContent: 'center',
+        gap: 40,
+        // flex: 1
       },
-      userImage: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        marginRight: 16,
-      },
-      userInfo: {
-        flex: 1,
-      },
-      userName: {
-        fontSize: 16,
-        fontWeight: 'bold',
-      },
-      userAge: {
-        fontSize: 14,
-        color: '#666',
-      },
-      userProfession: {
-        fontSize: 14,
-        color: '#333',
-      },
-      userDistance: {
-        fontSize: 14,
-        color: '#999',
+      name: {
+        fontSize: 20,
+        fontFamily: 'Poppins-SemiBold',
+        color: '#fff',
       },
       listContainer: {
-        paddingVertical: 16,
-        paddingHorizontal: 16,
+        paddingVertical: 10,
+        paddingHorizontal: 10,
+      },
+      popupContainer: {
+        // paddingHorizontal: 20,
+        // paddingVertical: 10,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 5,
+        margin: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      },
+      popupButton1: {
+        paddingHorizontal: 18,
+        paddingVertical: 1,
+        borderTopLeftRadius: 5,
+        borderBottomLeftRadius: 5,
+        backgroundColor: '#f0f0f0'
+      },
+      popupButton2: {
+        paddingHorizontal: 18,
+        paddingVertical: 1,
+        backgroundColor: '#f0f0f0'
+      },
+      popupButton3: {
+        paddingHorizontal: 18,
+        paddingVertical: 1,
+        borderTopRightRadius: 5,
+        borderBottomRightRadius: 5,
+        backgroundColor: '#f0f0f0',
+      },
+      popupButtonText:{
+        fontFamily: 'Poppins-Bold',
+        color: '#e94057',
+        fontSize: 14,
+      },
+      activeButton: {
+        backgroundColor: '#E94057'
+      },
+      activeButtonText: {
+        color: '#fff'
       },
 })

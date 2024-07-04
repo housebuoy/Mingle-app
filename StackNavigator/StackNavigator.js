@@ -19,11 +19,13 @@ import HomeScreen from '../screens/HomeScreen.js';
 import useAuth from '../hooks/useAuth.js';
 import MatchScreen from '../screens/MatchScreen.js';
 import MessageScreen from '../screens/MessageScreen.js';
+import {LikedUsersProvider} from '../hooks/likedUsersContext.js';
+
 
 export default function App({art}) {
-    console.log(art)
-    // const {user} = useAuth()
+    
   return (
+    <LikedUsersProvider>
       <Stack.Navigator
        initialRouteName="Welcome"
        >
@@ -118,14 +120,14 @@ export default function App({art}) {
             options={{
                 headerShown: false,
             }} 
-            art={art}
             />
             <Stack.Screen 
             name="Matches" 
             component={MatchScreen}
             options={{
                 headerShown: false,
-            }} />
+            }} 
+            />
             <Stack.Screen 
             name="Messages" 
             component={MessageScreen}
@@ -133,6 +135,7 @@ export default function App({art}) {
                 headerShown: false,
             }} />
       </Stack.Navigator>
+      </LikedUsersProvider>
   );
 }
 

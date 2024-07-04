@@ -9,6 +9,7 @@ import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-solid.png';
 import search from '../assets/images/icons/search-alt-regular-36.png';
 import { Icon } from '@rneui/themed';
+import { data } from '../components/data'
 
 const MessageScreen = ({navigation}) => {
 
@@ -23,83 +24,8 @@ const MessageScreen = ({navigation}) => {
         setIsSearchModalVisible(!isSearchModalVisible);
         }
     };
-    const data = [
-        {
-          id: '1',
-          name: 'Jessica Parker',
-          text: "Hello 😂",
-          time: 22,
-          unread: 4,
-          image: require('../assets/images/photo.png'),
-          activity: require('../assets/images/photo1.png'),
-        },
-        {
-          id: '2',
-          name: 'Emily Johnson',
-          text: 'I missed your call',
-          time: 22,
-        //   unread: 4,
-          image: require('../assets/images/photo2.png'), // Replace with actual image URL
-        },
-        {
-          id: '3',
-          name: 'Sophia Williams',
-          text: 'when will you be seeing me😊',
-          time: 10,
-          unread: 8,
-          image: require('../assets/images/photo1.png'), // Replace with actual image URL
-          activity: require('../assets/images/photo3.png'),
-        },
-        {
-          id: '4',
-          name: 'Olivia Brown',
-          text: 25,
-          time: 1,
-        //   unread: 4,
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-          activity: require('../assets/images/photo4.png'),
-        },
-        {
-          id: '5',
-          name: 'Ava Davis',
-          time: 43,
-          text: 24,
-        //   unread: 4,
-          image: require('../assets/images/photo3.png'), // Replace with actual image URL
-        },
-        {
-          id: '6',
-          name: 'Ava Davis',
-          text: 24,
-          time: 18,
-        //   unread: 4,
-          image: require('../assets/images/photo4.png'), // Replace with actual image URL
-        },
-        {
-          id: '7',
-          name: 'Ava Davis',
-          text: 24,
-          unread: 4,
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        {
-          id: '8',
-          name: 'Quarms Henry',
-          text: 24,
-          unread: 4,
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-          activity: require('../assets/images/photo2.png'),
-        },
-        {
-          id: '9',
-          name: 'Mary Daniels',
-          text: 24,
-          unread: 164,
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-          activity: require('../assets/images/photo.png'),
-        },
-        // Add more users as needed
-      ];
+
+    
       const count = data.unread
       const filteredData = data.filter(item => item.name.toLowerCase().includes(searchText.toLowerCase()));
 
@@ -130,6 +56,17 @@ const MessageScreen = ({navigation}) => {
                     </Text>
                 </View>)
                 }
+            </View>
+          </TouchableOpacity>
+        </View>
+      );
+
+      const renderSearchItem = ({ item }) => (
+        <View style={styles.userContainer}>
+          <Image source={item.image} style={styles.userImage} />
+          <TouchableOpacity style={styles.userInfo}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',}}>
+                <Text style={styles.userName}>{item.name}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -213,7 +150,7 @@ const MessageScreen = ({navigation}) => {
                     <View style={styles.viewContainer}>
                     <FlatList
                         data={filteredData}
-                        renderItem={renderItem}
+                        renderItem={renderSearchItem}
                         keyExtractor={(item) => item.id}
                         contentContainerStyle={styles.listContainer}
                         style={styles.flatList}

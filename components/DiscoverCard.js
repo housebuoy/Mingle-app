@@ -3,63 +3,24 @@ import React, { useState, useRef } from 'react'
 import woman from '../assets/images/photo.png';
 import Swiper from 'react-native-deck-swiper';
 import { Icon } from 'react-native-elements';
+import { data } from './data'
+import { useLikedUsers } from '../hooks/likedUsersContext';
 
 const DiscoverCard = () => {
-
-    const data = [
-        {
-          id: '1',
-          name: 'Jessica Parker',
-          age: 23,
-          profession: 'Professional model',
-          distance: '1 km',
-          image: require('../assets/images/photo.png'),
-        },
-        {
-          id: '2',
-          name: 'Emily Johnson',
-          age: 27,
-          profession: 'Graphic Designer',
-          distance: '2 km',
-          image: require('../assets/images/photo2.png'), // Replace with actual image URL
-        },
-        {
-          id: '3',
-          name: 'Sophia Williams',
-          age: 22,
-          profession: 'Software Engineer',
-          distance: '1.5 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        {
-          id: '4',
-          name: 'Olivia Brown',
-          age: 25,
-          profession: 'Marketing Specialist',
-          distance: '3 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        {
-          id: '5',
-          name: 'Ava Davis',
-          age: 24,
-          profession: 'Photographer',
-          distance: '0.5 km',
-          image: require('../assets/images/onboarding/female1.png'), // Replace with actual image URL
-        },
-        // Add more users as needed
-      ];
       
 
       const [users, setUsers] = useState(data);
+      const { likedUsers, setLikedUsers } = useLikedUsers();
       const swiperRef = useRef(null);
     
       const handleSwipeLeft = (cardIndex) => {
         console.log('Disliked:', users[cardIndex].name);
       };
+      
     
       const handleSwipeRight = (cardIndex) => {
-        console.log('liked:', users[cardIndex].name);
+        console.log('liked:', users[cardIndex].id);
+        setLikedUsers(prevLikedUsers => [...prevLikedUsers, users[cardIndex].id]);
       };
       const handleSwipeTop = (cardIndex) => {
         console.log('Super liked:', users[cardIndex].name);
@@ -87,7 +48,7 @@ const DiscoverCard = () => {
       return (
         <View style={styles.container}>
           <View style={{marginBottom: -20, marginTop: 10}}>
-            <Text style={{fontFamily: 'Poppins-Regular', textAlign: 'center', fontSize: 18, color:'#767474'}}>Make new matches by swiping</Text>
+            <Text style={{fontFamily: 'Poppins-SemiBold', textAlign: 'center', fontSize: 18, color:'#767474'}}>Make new matches by swiping</Text>
           </View>
         <View >
           <Swiper
@@ -106,7 +67,7 @@ const DiscoverCard = () => {
         </View>
         <View style={styles.actionButtons}>
             <TouchableOpacity onPress={() => swiperRef.current.swipeLeft()} style={styles.actionButton}>
-              <Icon name="close" type="material" size={35} color="#ff6b6b" />
+              <Icon name="close" type="font-awesome" size={35} color="#ff6b6b" />
             </TouchableOpacity>
             <View style={styles.heartButtonContainer}>
               <TouchableOpacity onPress={() => swiperRef.current.swipeRight()} style={styles.heartButton}>

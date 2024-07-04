@@ -12,8 +12,8 @@ import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 
 
-const HomeScreen = ({navigation, location}) => {
-
+const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
+  // const [likedUsers, setLikedUsers] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   const toggleModal = () => {
@@ -52,7 +52,11 @@ const HomeScreen = ({navigation, location}) => {
                  iconSource={setting} 
                  handlePress={toggleModal}
       />
-      <DiscoverCard />
+
+      <DiscoverCard likedUsers={likedUsers}
+                    setLikedUsers={setLikedUsers}      
+      />
+
       <BottomNavBar navigation={navigation} 
                     cardIcon={cards}
                     matchIcon={heart}
@@ -168,6 +172,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
     marginTop: 5,
+    backgroundColor: '#fff'
   },
   modalContainer: {
     flex: 1,

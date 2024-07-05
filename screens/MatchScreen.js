@@ -7,6 +7,7 @@ import sort from '../assets/images/icons/sort-two.png'
 import cardTrans from '../assets/images/icons/card-solid-trans.png'
 import heartRed from '../assets/images/icons/heart-solid.png'
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
+import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
 import { data as users } from '../components/data'
 import { useLikedUsers } from '../hooks/likedUsersContext'
@@ -139,6 +140,7 @@ const MatchScreen = ({navigation}) => {
                           cardIcon={cardTrans}        
                           matchIcon={heartRed} 
                           messageIcon={messages}
+                          userIcon={user} 
             />        
     </SafeAreaView>
   )

@@ -4,7 +4,7 @@ import people from '../assets/images/icons/user.png';
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 
 
-const BottomNavBar = ({navigation, cardIcon, matchIcon, messageIcon}) => {
+const BottomNavBar = ({navigation, cardIcon, matchIcon, messageIcon, userIcon}) => {
   const [activeIndex, setActiveIndex] = useState(-1);
 
   const handlePress = (index) => {
@@ -22,15 +22,15 @@ const BottomNavBar = ({navigation, cardIcon, matchIcon, messageIcon}) => {
         <Image source={cardIcon} resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
       <TouchableOpacity 
-        onPress={() => {navigation.navigate('Matches')}}>
+        onPress={() => {navigation.navigate('Interests')}}>
         <Image source={matchIcon}
           resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => {navigation.navigate('Messages')}}>
         <Image source={messageIcon} resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
-      <TouchableOpacity>
-        <Image source={people} resizeMode='contain' style={styles.icon}/>
+      <TouchableOpacity onPress={() => {navigation.navigate('Account')}}>
+        <Image source={userIcon} resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
     </View>
   )

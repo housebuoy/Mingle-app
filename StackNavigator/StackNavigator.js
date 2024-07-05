@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import React from 'react'
 import Welcome from '../screens/Welcome';
 import { createStackNavigator } from '@react-navigation/stack';
 import Onboarding from '../screens/Onboarding';
@@ -20,9 +20,31 @@ import useAuth from '../hooks/useAuth.js';
 import MatchScreen from '../screens/MatchScreen.js';
 import MessageScreen from '../screens/MessageScreen.js';
 import {LikedUsersProvider} from '../hooks/likedUsersContext.js';
+import ChatScreen from '../screens/ChatScreen.js';
+import { TouchableOpacity, View, Image, StyleSheet } from 'react-native'
+import { Icon } from '@rneui/themed';
+import { useNavigation } from '@react-navigation/native';
+import AccountProfileScreen from '../screens/AccountProfileScreen.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {getAuth, signOut, } from 'firebase/auth'
 
 
-export default function App({art}) {
+export default function App({profilePicture}) {
+    const navigation = useNavigation();
+    const handleGoBack = () => {
+        navigation.goBack();
+    };
+    const auth = getAuth();
+    const logout = async () => {
+        try {
+          await signOut(auth);
+          // Remove the user's login token from AsyncStorage
+          await AsyncStorage.removeItem('userToken');
+          navigation.navigate('Login');
+        } catch (error) {
+          console.error('Error signing out:', error);
+        }
+      };
     
   return (
     <LikedUsersProvider>
@@ -134,8 +156,91 @@ export default function App({art}) {
             options={{
                 headerShown: false,
             }} />
+            <Stack.Screen 
+            name="Chat" 
+            component={ChatScreen}
+            options={({ route }) => ({
+                title: route.params.userName,
+                headerLeft: () => (
+                    <View style={{ flexDirection: 'row', alignItems: 'space-between',}}>
+                      <Image
+                        source={ route.params.profilePicture }
+                        style={{ width: 50, height: 50, borderRadius: 30, marginLeft: 25 }}
+                        resizeMode='cover'
+                      />
+                    </View>),
+                    headerRight: () => (
+                        <View style={{ flexDirection: 'row', alignItems: 'space-between',}}>
+                          <TouchableOpacity style={{        
+                                paddingVertical: 12,
+                                paddingHorizontal: 12,
+                                borderWidth: 1,
+                                borderColor: '#E8E6EA',
+                                borderRadius: 10, 
+                                marginRight: 15}} >
+                            <Icon name="options-vertical" type='simple-line-icon' size={20} color="#E94057" />
+                          </TouchableOpacity>
+                        </View>),
+                    headerTitleStyle: {
+                        fontFamily: 'Poppins-Bold',
+                        fontSize: 20
+                      },
+                      headerStyle: {
+                        height: 100,
+                        borderBottomWidth: 1,
+                        borderColor: '#ccc'
+                      },
+      
+            })}/>
+                    <Stack.Screen 
+            name="Account" 
+            component={AccountProfileScreen}
+            options={{
+                headerLeft: () => (
+                    <TouchableOpacity style={styles.topRightNav} onPress={handleGoBack}>
+                        <Icon name="chevron-left" type='entypto' size={30} color="#E94057" />
+                    </TouchableOpacity>
+                ),
+                headerRight: () => (
+                      <TouchableOpacity 
+                      onPress={() => {
+                        logout()
+                        // console.log(auth.currentUser.uid)
+                      }}
+                      style={{        
+                            paddingVertical: 12,
+                            paddingHorizontal: 12,
+                            borderWidth: 1,
+                            borderColor: '#E8E6EA',
+                            borderRadius: 10, 
+                            marginRight: 15}} >
+                        <Icon name="logout" size={30} color="#E94057" />
+                      </TouchableOpacity>
+                ),
+                headerTitleStyle: {
+                    fontFamily: 'Poppins-Bold',
+                    fontSize: 30,
+                },
+                headerStyle: {
+                    height: 100,
+                    borderBottomWidth: 1,
+                    borderColor: '#ccc'
+                },
+                    
+            }} />
       </Stack.Navigator>
       </LikedUsersProvider>
   );
 }
+
+const styles = StyleSheet.create({
+    topRightNav: {
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
+        borderRadius: 10,
+        marginLeft: 10
+      },
+})
 

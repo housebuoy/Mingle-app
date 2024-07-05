@@ -8,6 +8,7 @@ import cardTrans from '../assets/images/icons/card-solid-trans.png'
 import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-solid.png';
 import search from '../assets/images/icons/search-alt-regular-36.png';
+import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
 import { data } from '../components/data'
 
@@ -32,7 +33,7 @@ const MessageScreen = ({navigation}) => {
       const renderItem = ({ item }) => (
         <View style={styles.userContainer}>
           <Image source={item.image} style={styles.userImage} />
-          <TouchableOpacity style={styles.userInfo}>
+          <TouchableOpacity style={styles.userInfo} onPress={() => navigation.navigate('Chat', { userId: item.id, userName: item.name, profilePicture: item.image })}>
             <View style={{flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',}}>
                 <Text style={styles.userName}>{item.name}</Text>
                 <Text style={styles.userTime}>{item.time} mins</Text>
@@ -125,6 +126,7 @@ const MessageScreen = ({navigation}) => {
                           cardIcon={cardTrans}        
                           matchIcon={heart} 
                           messageIcon={messages}
+                          userIcon={user}
             />
             <Modal visible={isSearchModalVisible} animationType="slide" transparent={true}>
                 <View style={styles.searchModalContainer}>

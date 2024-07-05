@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Pressable } from 'react-native';
+import { useLikedUsers } from '../hooks/likedUsersContext';
 
 const InterestsScreen = ({ navigation }) => {
-  const [selectedInterests, setSelectedInterests] = useState([]);
+  const { selectedInterests, setSelectedInterests } = useLikedUsers();
 
   const toggleInterest = (interest) => {
     if (selectedInterests.includes(interest)) {
@@ -68,7 +69,7 @@ const InterestsScreen = ({ navigation }) => {
           selectedInterests.length === 0 && styles.disabledContinueButton
         ]}
         disabled={selectedInterests.length === 0}
-        onPress={() => navigation.navigate('EnableLocation')}
+        onPress={() => navigation.navigate('EnableLocation', {selectedInterests})}
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>

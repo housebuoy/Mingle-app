@@ -10,6 +10,7 @@ import setting from '../assets/images/icons/setting-config.png';
 import cards from '../assets/images/icons/card-solid-36.png';
 import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
+import user from '../assets/images/icons/user.png';
 
 
 const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
@@ -61,6 +62,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                     cardIcon={cards}
                     matchIcon={heart}
                     messageIcon={messages}
+                    userIcon={user}
                     location={location}
       />
 

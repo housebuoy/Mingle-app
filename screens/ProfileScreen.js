@@ -10,6 +10,7 @@ import ImageViewer from '../components/ImageViewer';
 const ProfileScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState(''); 
+  const [occupation, setOccupation] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -89,6 +90,12 @@ const ProfileScreen = ({ navigation }) => {
           placeholder="Last name"
           value={lastName}
           onChangeText={setLastName}
+        />
+        <TextInput
+          style={styles.profileinput}
+          placeholder="Occupation"
+          value={occupation}
+          onChangeText={setOccupation}
         />
         <TouchableOpacity style={styles.birthdayButton} onPress={showDatepicker}>
           <Image source={calendar} style={{width: 18, height: 18}}/>

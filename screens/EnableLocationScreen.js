@@ -3,6 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, Platform, Image } from 'react
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import locationsvg from '../assets/images/locationsvg.png'
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+
+const db = getFirestore();
+const auth = getAuth();
 
 
 const EnableLocationScreen = () => {
@@ -35,14 +40,35 @@ const EnableLocationScreen = () => {
   const handleAccessLocation = async () => {
     try {
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      const { latitude, longitude } = location.coords;
+      const userId = auth.currentUser.uid;
+      await storeLocationData(userId, latitude, longitude);
       console.log(location);
-      navigation.navigate('Searchfriend', {art});  // Navigate to the SearchFriends screen
+      navigation.navigate('Searchfriend');
     } catch (error) {
       console.error('Error', 'Failed to access location');
+      console.error(error);
     }
   };
 
-  const art = 'you'
+    const storeLocationData = async (userId, latitude, longitude) => {
+      try {
+        const userRef = doc(db, "users", userId);
+        await updateDoc(userRef, {
+          location: {
+            latitude,
+            longitude,
+          },
+        });
+        console.log('Location data updated successfully');
+      } catch (error) {
+        console.error('Error storing location data:', error);
+      }
+    };
+
+
+
+
 
   return (
     <View style={styles.container}>

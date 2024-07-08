@@ -1,14 +1,48 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
 import DropDown from '../components/DropDown';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+
+const db = getFirestore();
+const auth = getAuth();
 
 const GenderScreen = ({ navigation }) => {
   const [selectedGender, setSelectedGender] = useState('');
+  const [error, setError] = useState('');
+
 
   const handleGenderSelect = (gender) => {
     setSelectedGender(gender);
     console.log('Selected gender:', gender);
   };
+
+  const saveGenderToFirestore = async (userId, selectedGender) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        gender: selectedGender,
+      });
+      console.log('User gender updated successfully');
+    } catch (error) {
+      setError('Error storing gender: ' + error.message);
+      console.error('Error storing gender:', error);
+    }
+  };
+  const userId = auth.currentUser.uid;
+
+  const handleGenderStore = async () => {
+    console.log(userId)
+    try {
+      await saveGenderToFirestore(userId, selectedGender);
+      console.log('Gender updated');
+      navigation.navigate('Interests');
+    } catch (error) {
+      setError('Failed to update gender: ' + error.message);
+      console.error('Error', error);
+    }
+  };
+
 
   return (
     <View style={styles.gendercontainer}>
@@ -52,7 +86,7 @@ const GenderScreen = ({ navigation }) => {
         >Man</Text>
       </TouchableOpacity>
       <DropDown onGenderSelect={handleGenderSelect}/>
-      <TouchableOpacity style={styles.gendercontinueButton} onPress={() => navigation.navigate('Interests')}>
+      <TouchableOpacity style={styles.gendercontinueButton} onPress={() => handleGenderStore()}>
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
     </View>

@@ -1,17 +1,24 @@
 import React, { useState} from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity,Pressable, Image, Modal } from 'react-native';
-// import { launchImageLibrary } from 'react-native-image-picker';
+// import firebase from 'firebase/app';
+import 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';// import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
 import female1 from '../assets/images/onboarding/female1.png'
 import calendar from '../assets/images/calendar-solid-24.png'
 import ImageViewer from '../components/ImageViewer';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 
+const db = getFirestore();
+const auth = getAuth();
 const ProfileScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState(''); 
   const [occupation, setOccupation] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
+  
+  
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -58,17 +65,46 @@ const ProfileScreen = ({ navigation }) => {
     return true;
     }
   };
+
+
+const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      firstName: firstName,
+      lastName: lastName,
+      occupation: occupation,
+      birthdate: date,
+      profileImageUrl: selectedImage,
+    });
+    console.log('User profile info updated successfully');
+  } catch (error) {
+    console.error('Error storing profile info:', error);
+  }
+};
+
+const userId = auth.currentUser.uid;
+const handleProfileUpdate = async () => {
+  try {
+    await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage);
+    console.log('profile updated');
+    navigation.navigate('Gender');
+  } catch (error) {
+    console.error('Error', 'Failed to access location');
+    console.error(error);
+  }
+};
   
 
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centeredContainer}>
-      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('Gender')}>
+      {/* <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('Gender')}>
           <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, color: "#E94057", lineHeight: 25, marginTop: -100 }}>
             Skip
           </Text>
-        </Pressable>
+        </Pressable> */}
         <Text style={styles.profileTitle}>Profile details</Text>
         <TouchableOpacity style={styles.profileImageContainer} onPress={pickImageAsync}>
         <ImageViewer
@@ -112,7 +148,10 @@ const ProfileScreen = ({ navigation }) => {
             )}
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.confirmButton} onPress={() => navigation.navigate('Gender')}>
+        <TouchableOpacity style={styles.confirmButton} onPress={() => {
+          // navigation.navigate('Gender')
+          handleProfileUpdate()
+          }}>
           <Text style={styles.profilebuttonText}>Confirm</Text>
         </TouchableOpacity>
       </View>

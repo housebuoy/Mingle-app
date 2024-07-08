@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import notification from '../assets/images/notification.png'
 import * as Notifications from 'expo-notifications';
 
-const AllowNotificationScreen = () => {
+const AllowNotificationScreen = ({navigation}) => {
   const [notificationPermission, setNotificationPermission] = useState(null);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ const AllowNotificationScreen = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.skipButton}>
+      <TouchableOpacity style={styles.skipButton} onPress={navigation.navigate('Profile')}>
         <Text style={styles.skipButtonText}>Skip</Text>
       </TouchableOpacity>
 
@@ -39,7 +39,10 @@ const AllowNotificationScreen = () => {
         <Text style={styles.subtitle}>Get push-notification when you get the match or receive a message.</Text>
       </View>
 
-      <TouchableOpacity style={styles.accessButton} onPress={handleNotificationButtonPress}>
+      <TouchableOpacity style={styles.accessButton} onPress={() => { 
+        handleNotificationButtonPress
+        navigation.navigate('Profile')
+        }}>
         <Text style={styles.accessButtonText}>Turn on notification</Text>
       </TouchableOpacity>
     </View>

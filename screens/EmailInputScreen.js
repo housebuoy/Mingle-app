@@ -1,11 +1,14 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Modal, Alert, } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, ScrollView, Modal, Alert, } from 'react-native';
 import app from '../utils/firebaseConfig';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { doc, setDoc } from "firebase/firestore"; 
+import { doc, setDoc, getFirestore } from "firebase/firestore"; 
 import 'firebase/firestore';
-import { db } from '../utils/firebaseConfig'
+// import { db } from '../utils/firebaseConfig'
+// import { registerUser } from '../backend/db';
+const auth = getAuth();
+const db = getFirestore();
 
 const EmailInputScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -16,6 +19,7 @@ const EmailInputScreen = ({ navigation }) => {
   const [modalMessage, setModalMessage] = useState('');
   const [emailError, setEmailError] = useState('');
   const isFocused = useRef(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const inputStyle = [
     styles.input,
     isFocused.current? styles.inputFocused : {}
@@ -46,7 +50,7 @@ const EmailInputScreen = ({ navigation }) => {
     registerAndLogin()
     setTimeout(() => {
       setModalVisible(false);
-      navigation.navigate('EnableLocation');
+      // navigation.navigate('EnableLocation');
     }, 3000);
     } else {
       setModalMessage("Please fill all required fields!");
@@ -62,34 +66,42 @@ const EmailInputScreen = ({ navigation }) => {
     setModalMessage(""); // Optional: Reset the message when closing the modal
   };
 
-const storeUserData = () => {
-  setDoc(doc(db, "users", email), {
-    username: userName,
-    name: nameValue,
-    email: email,
-  })
-  .then(() => {
-    console.log('User data submitted');
-  })
-  .catch((error) => {
-    console.log(error);
-  });
-}
-
-  async function registerAndLogin(){
-    try{
-      const auth = getAuth(app);
-      await createUserWithEmailAndPassword(auth, email, password);
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('success', response.user.uid)
-      storeUserData();
-      return;
+  
+  const storeUserData = async (userId, userName, nameValue, email) => {
+    try {
+      await setDoc(doc(db, "users", userId), {
+        userId: userId,
+        username: userName,
+        name: nameValue,
+        email: email,
+      });
+      console.log('User data submitted');
+    } catch (error) {
+      console.log(error);
     }
-    catch(error){
-      Alert.alert('something went wrong')
+  };
+  
+  async function registerAndLogin() {
+    try {
+
+
+      setIsLoading(true);
+
+      const auth = getAuth(app);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
+      await storeUserData(userId, userName, nameValue, email);
+      const response = await signInWithEmailAndPassword(auth, email, password);
+      Alert.alert('Success', userId);
+      navigation.navigate('EnableLocation');
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Something went wrong', error.message);
+    }
+    finally {
+      setIsLoading(false);
     }
   }
-
 
 
 
@@ -138,6 +150,7 @@ const storeUserData = () => {
                 onBlur={() => (isFocused.current = false)}
                 placeholder="Enter Email address"
                 value={email}
+                keyboardType="email-address"
                 onChangeText={(text) => {
                   setEmail(text);
                   validateEmail(text); // Validate the email as the user types
@@ -166,6 +179,9 @@ const storeUserData = () => {
                     Continue
                 </Text>
             </TouchableOpacity>
+            <View style={styles.loadingContainer}>
+              {isLoading && <ActivityIndicator size="large" color="#e94057" />}
+            </View>
             <Modal
               animationType="fade"
               transparent={true}
@@ -287,6 +303,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
 })

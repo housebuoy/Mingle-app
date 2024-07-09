@@ -42,16 +42,23 @@ const EnableLocationScreen = () => {
       let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       const { latitude, longitude } = location.coords;
       const userId = auth.currentUser.uid;
-      await storeLocationData(userId, latitude, longitude);
+
+      const addresses = await Location.reverseGeocodeAsync(location.coords);
+      const address = addresses.length > 0 ? addresses[0] : {street: '', city: '', state: '', country: '', postalCode: '',subregion: '' ,};
       console.log(location);
-      navigation.navigate('Searchfriend');
+      console.log(address);
+      console.log(address.city);
+      navigation.navigate('Searchfriend');      
+      await storeLocationData(userId, latitude, longitude, address);
     } catch (error) {
       console.error('Error', 'Failed to access location');
       console.error(error);
     }
   };
 
-    const storeLocationData = async (userId, latitude, longitude) => {
+  
+
+    const storeLocationData = async (userId, latitude, longitude, address) => {
       try {
         const userRef = doc(db, "users", userId);
         await updateDoc(userRef, {
@@ -59,6 +66,14 @@ const EnableLocationScreen = () => {
             latitude,
             longitude,
           },
+            address: {
+              street: address.street || '',
+              city: address.city || '',
+              state: address.region || '',
+              country: address.country || '',
+              postalCode: address.postalCode || '',
+              subregion: address.subregion || ''
+            },
         });
         console.log('Location data updated successfully');
       } catch (error) {

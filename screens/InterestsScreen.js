@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Pressable } from 'react-native';
 import { useLikedUsers } from '../hooks/likedUsersContext';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 
+
+const db = getFirestore();
+const auth = getAuth();
 const InterestsScreen = ({ navigation }) => {
   const { selectedInterests, setSelectedInterests } = useLikedUsers();
+  const [error, setError] = useState('');
 
   const toggleInterest = (interest) => {
     if (selectedInterests.includes(interest)) {
@@ -13,6 +19,7 @@ const InterestsScreen = ({ navigation }) => {
     }
   };
 
+  console.log(selectedInterests)
   const interests = [
     { id: 1, label: 'Photography' },
     { id: 2, label: 'Shopping' },
@@ -29,6 +36,32 @@ const InterestsScreen = ({ navigation }) => {
     { id: 13, label: 'Drink' },
     { id: 14, label: 'Video games' },
   ];
+
+  const saveInterestsToFirestore = async (userId, selectedInterests) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        interests: selectedInterests,
+      });
+      console.log('User interests updated successfully');
+    } catch (error) {
+      setError('Error storing interest: ' + error.message);
+      console.error('Error storing interest:', error);
+    }
+  };
+  const userId = auth.currentUser.uid;
+
+  const handleInterestsStore = async () => {
+    console.log(userId)
+    try {
+      await saveInterestsToFirestore(userId, selectedInterests);
+      console.log('Interest updated');
+      navigation.navigate('Home', {selectedInterests});
+    } catch (error) {
+      setError('Failed to update interest: ' + error.message);
+      console.error('Error', error);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -69,7 +102,7 @@ const InterestsScreen = ({ navigation }) => {
           selectedInterests.length === 0 && styles.disabledContinueButton
         ]}
         disabled={selectedInterests.length === 0}
-        onPress={() => navigation.navigate('EnableLocation', {selectedInterests})}
+        onPress={() => handleInterestsStore()}
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>

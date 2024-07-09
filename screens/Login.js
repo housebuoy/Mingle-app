@@ -113,6 +113,7 @@ const Login = ({ navigation }) => {
               onBlur={() => (isFocused.current = false)}
               placeholder="Enter Email address"
               value={email}
+              keyboardType="email-address"
               onChangeText={(text) => {
                 setEmail(text);
                 validateEmail(text); // Validate the email as the user types

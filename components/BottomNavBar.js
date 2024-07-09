@@ -22,7 +22,7 @@ const BottomNavBar = ({navigation, cardIcon, matchIcon, messageIcon, userIcon}) 
         <Image source={cardIcon} resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>
       <TouchableOpacity 
-        onPress={() => {navigation.navigate('Interests')}}>
+        onPress={() => {navigation.navigate('Matches')}}>
         <Image source={matchIcon}
           resizeMode='contain' style={styles.icon}/>
       </TouchableOpacity>

@@ -13,6 +13,7 @@ const Stack = createStackNavigator();
 import {useState} from 'react'
 import StackNavigator from './StackNavigator/StackNavigator.js'
 import { AuthProvider } from './hooks/useAuth.js';
+import { UserProvider } from './context/UseContext.js';
 
 
 export default function App() {
@@ -23,9 +24,9 @@ export default function App() {
   return (
     
       <NavigationContainer>
-        {/* <AuthProvider> */}
+        <UserProvider>
         <StackNavigator />
-        {/* </AuthProvider>r */}
+        </UserProvider>
       </NavigationContainer>
     
   );}

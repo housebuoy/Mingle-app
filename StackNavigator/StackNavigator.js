@@ -25,6 +25,7 @@ import { TouchableOpacity, View, Image, StyleSheet } from 'react-native'
 import { Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import AccountProfileScreen from '../screens/AccountProfileScreen.js';
+import ProfileUpdate from '../screens/ProfileUpdate.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getAuth, signOut, } from 'firebase/auth'
 
@@ -97,6 +98,12 @@ export default function App({profilePicture}) {
             <Stack.Screen 
             name="Profile" 
             component={ProfileScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="ProfileUpdate" 
+            component={ProfileUpdate}
             options={{
                 headerShown: false,
             }} />

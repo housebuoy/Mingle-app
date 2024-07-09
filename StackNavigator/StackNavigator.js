@@ -26,6 +26,7 @@ import { Icon } from '@rneui/themed';
 import { useNavigation } from '@react-navigation/native';
 import AccountProfileScreen from '../screens/AccountProfileScreen.js';
 import ProfileUpdate from '../screens/ProfileUpdate.js';
+import UpdateInterests from '../screens/UpdateInterests.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getAuth, signOut, } from 'firebase/auth'
 
@@ -116,6 +117,12 @@ export default function App({profilePicture}) {
             <Stack.Screen 
             name="Interests" 
             component={InterestsScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="InterestUpdate" 
+            component={UpdateInterests}
             options={{
                 headerShown: false,
             }} />

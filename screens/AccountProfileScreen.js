@@ -11,7 +11,6 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, getDoc, arrayUnion, arrayRemove, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { differenceInYears } from 'date-fns';
 import GalleryViewer from '../components/GalleryViewer';
 import * as ImagePicker from 'expo-image-picker';
 import { useUser } from '../context/UseContext';
@@ -23,13 +22,14 @@ const AccountProfileScreen = ({navigation}) => {
   const [galleryImages, setGalleryImages] = useState([]);
   // const [userData, setUserData] = useState(null);
   const [isloading, setIsLoading] = useState(true);
-  // const [error, setError] = useState(null);
+  const [reveal, setReveal] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const { userData, loading, error } = useUser();
 
-  const handleGoBack = () => {
-    navigation.goBack();
+
+  const toggleReveal = () => {
+    setReveal(!reveal);
   };
 
   const data = 
@@ -237,7 +237,7 @@ const AccountProfileScreen = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
         <View style={{width: '100%', height: 130, borderRadius: 60, marginTop: 5, alignItems: 'center'}}>
-          <Image source={{uri: userData.profileImageUrl}} resizeMode='cover' style={{width: 130, height: '100%', borderBottomLeftRadius: 30 , borderTopRightRadius: 30 , padding: 2}}/>
+          <Image source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : female1} resizeMode='cover' style={{width: 130, height: '100%', borderBottomLeftRadius: 30 , borderTopRightRadius: 30 , padding: 2}}/>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
@@ -261,10 +261,34 @@ const AccountProfileScreen = ({navigation}) => {
         <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>About</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.userInfo}</Text>
+            {reveal ? (
+        <Text
+          style={{
+            fontFamily: 'Poppins-Regular',
+            fontSize: 18,
+            color: '#7f7e7e',
+            marginTop: 2,
+          }}
+        >
+          {userData.userInfo}
+        </Text>
+      ) : (
+        <Text
+          style={{
+            fontFamily: 'Poppins-Regular',
+            fontSize: 18,
+            color: '#7f7e7e',
+            marginTop: 2,
+          }}
+        >
+          {userData.userInfo.length > 50
+            ? userData.userInfo.slice(0, 76) + '...'
+            : userData.userInfo}
+        </Text>
+      )}
           </View>
-          <TouchableOpacity style={[{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]} >
-            <Text style={{fontFamily: 'Poppins-Bold', fontSize: 16, color: '#E94057'}}>Read more</Text>
+          <TouchableOpacity style={[{flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]}  onPress={toggleReveal}>
+            <Text style={{fontFamily: 'Poppins-Bold', fontSize: 16, color: '#E94057'}}>{reveal ? 'Read less' : 'Read more'}</Text>
           </TouchableOpacity>
         </View>
         <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10}}>
@@ -272,7 +296,7 @@ const AccountProfileScreen = ({navigation}) => {
           <View  style={{flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', flexWrap: 'wrap', gap: 5}}>            
               {userData.interests && userData.interests.map((interest, index) => (
                 <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]} >
-                  <Text sty key={index} style={styles.interestTabText}>{interest}</Text>
+                  <Text key={index} style={styles.interestTabText}>{interest}</Text>
                 </TouchableOpacity>
               ))}
           </View>

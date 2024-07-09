@@ -11,6 +11,7 @@ import { getAuth } from 'firebase/auth';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '../context/UseContext';
 
 const db = getFirestore();
 const auth = getAuth();
@@ -20,6 +21,7 @@ const ProfileScreen = ({ navigation }) => {
   const [occupation, setOccupation] = useState(''); 
   const [userInfo, setUserInfo] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
+  const { userData } = useUser();
   
   
   const [loading, setLoading] = useState(false);
@@ -142,7 +144,16 @@ const handleProfileUpdate = async () => {
     console.error(error);
   }
 };
-  
+
+// const placeholderSource ={
+//     let profilePic = userData.profileImageUrl
+//     if (){
+        
+//     }
+// }
+
+
+   
 
 
   return (
@@ -151,7 +162,7 @@ const handleProfileUpdate = async () => {
         <Text style={styles.profileTitle}>Profile details</Text>
         <TouchableOpacity style={styles.profileImageContainer} onPress={pickImageAsync}>
         <ImageViewer
-          placeholderImageSource={female1}
+          placeholderImageSource={userData.profileImageUrl ? { uri: userData.profileImageUrl } : female1}
           selectedImage={selectedImage}
         />
             {loading && <ActivityIndicator size="large" color="#e94057" />}
@@ -184,6 +195,11 @@ const handleProfileUpdate = async () => {
           multiline
           onChangeText={setUserInfo}
         />
+        <TouchableOpacity style={[styles.birthdayButton]} onPress={() => {
+            navigation.navigate('InterestUpdate')
+          }}>
+          <Text style={styles.birthdayButtonText}>Update Interests</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.birthdayButton} onPress={showDatepicker}>
           <Image source={calendar} style={{width: 18, height: 18}}/>
           <Text style={styles.birthdayButtonText}>
@@ -200,7 +216,6 @@ const handleProfileUpdate = async () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.confirmButton} onPress={() => {
-        //   navigation.navigate('Account')
           handleProfileUpdate()
           }}>
           <Text style={styles.profilebuttonText}>Confirm</Text>
@@ -300,7 +315,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     borderRadius: 15,
     alignItems: 'center',
-    marginTop: 0,
+    marginTop: 3,
     width: '100%',
     justifyContent : "center",
     flexDirection: 'row',

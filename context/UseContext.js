@@ -24,7 +24,7 @@ export const UserProvider = ({ children }) => {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            // Example: Calculating age
+            //Calculating age
             const birthdate = new Date(userData.birthdate.toDate());
             const age = differenceInYears(new Date(), birthdate);
             const gallery = userData.gallery || [];
@@ -52,7 +52,7 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ userData, loading, error }}>
+    <UserContext.Provider value={{ userData, loading, error, setUserData }}>
       {children}
     </UserContext.Provider>
   );

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Pressable, Modal } from 'react-native';
 import DropDown from '../components/DropDown';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
@@ -10,6 +10,8 @@ const auth = getAuth();
 const GenderScreen = ({ navigation }) => {
   const [selectedGender, setSelectedGender] = useState('');
   const [error, setError] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
 
   const handleGenderSelect = (gender) => {
@@ -36,11 +38,24 @@ const GenderScreen = ({ navigation }) => {
     try {
       await saveGenderToFirestore(userId, selectedGender);
       console.log('Gender updated');
-      navigation.navigate('Interests');
+      if(selectedGender !== null){
+        navigation.navigate('Interests');
+      }else{
+        setModalMessage("Please fill all required fields!");
+        setModalVisible(true);
+        setTimeout(() => {
+          setModalVisible(false);
+        }, 1000);
+      }      
     } catch (error) {
       setError('Failed to update gender: ' + error.message);
       console.error('Error', error);
     }
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setModalMessage(""); // Optional: Reset the message when closing the modal
   };
 
 
@@ -89,6 +104,20 @@ const GenderScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.gendercontinueButton} onPress={() => handleGenderStore()}>
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
+      <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                closeModal();
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{modalMessage}</Text>
+            </View>
+          </View>
+        </Modal>
     </View>
   );
 };
@@ -160,5 +189,23 @@ const styles = StyleSheet.create({
     fontSize: 20,
     textAlign: 'center',
     fontFamily: 'Poppins-Bold'
+  },
+  modalView: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
 })

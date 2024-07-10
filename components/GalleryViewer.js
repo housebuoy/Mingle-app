@@ -5,23 +5,23 @@ import { Icon } from '@rneui/base';
 export default function GalleryViewer({ images, onRemoveImage }) {
   return (
     <View style={styles.galleryContainer}>
-    {images.map((image, index) => (
-      <View key={index} style={styles.galleryImageContainer}>
-        <Image source={{ uri: image }} style={styles.galleryImage} resizeMode="cover" />
-        <TouchableOpacity
-          style={styles.removeButton}
-          onPress={() => onRemoveImage(index)}
-        >
-          <Icon name="delete" size={20} color="#e94057" />
-        </TouchableOpacity>
-      </View>
-    ))}
-    {images.length === 0 && (
-      <View style={[styles.galleryTab1]}>
-        <Text style={styles.emptyText}>No images in the gallery</Text>
-      </View>
-    )}
-  </View>
+      {images.map((image, index) => (
+        <View key={index} style={styles.galleryImageContainer}>
+          <Image source={{ uri: image.downloadURL }} style={styles.galleryImage} resizeMode="cover" />
+          <TouchableOpacity
+            style={styles.removeButton}
+            onPress={() => onRemoveImage(index)}
+          >
+            <Icon name="delete" size={20} color="#e94057" />
+          </TouchableOpacity>
+        </View>
+      ))}
+      {images.length === 0 && (
+        <View style={[styles.galleryTab1]}>
+          <Text style={styles.emptyText}>No images in the gallery</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   galleryImageContainer: {
-    width: '45%',
+    width: '60%',
     height: 200,
     borderRadius: 10,
     overflow: 'hidden',
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     textAlign: 'center'
   },
-  galleryTab1:{
+  galleryTab1: {
     paddingHorizontal: 10,
     width: '60%',
     height: 200,

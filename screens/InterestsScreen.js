@@ -3,13 +3,17 @@ import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Pre
 import { useLikedUsers } from '../hooks/likedUsersContext';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { differenceInYears } from 'date-fns';
+import { useUser } from '../context/UseContext';
+
 
 
 const db = getFirestore();
 const auth = getAuth();
 const InterestsScreen = ({ navigation }) => {
   const { selectedInterests, setSelectedInterests } = useLikedUsers();
-  const [error, setError] = useState('');
+  const { setUserData } = useUser();
 
   const toggleInterest = (interest) => {
     if (selectedInterests.includes(interest)) {
@@ -52,16 +56,56 @@ const InterestsScreen = ({ navigation }) => {
   const userId = auth.currentUser.uid;
 
   const handleInterestsStore = async () => {
-    console.log(userId)
+    const userId = getAuth().currentUser.uid; // Make sure the user is authenticated
+    console.log(userId);
     try {
       await saveInterestsToFirestore(userId, selectedInterests);
       console.log('Interest updated');
-      navigation.navigate('Home', {selectedInterests});
+      await fetchUserData(userId); // Fetch user data after updating interests
     } catch (error) {
       setError('Failed to update interest: ' + error.message);
       console.error('Error', error);
     }
   };
+  
+
+  async function fetchUserData(userId) {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch user data
+      const userRef = doc(getFirestore(), 'users', userId);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        // Calculate age
+        const birthdate = new Date(userData.birthdate.toDate());
+        const age = differenceInYears(new Date(), birthdate);
+        const gallery = userData?.gallery || [];
+  
+        setUserData({
+          ...userData,
+          age,
+          gallery,
+        });
+  
+        // Navigate to Home screen with user data
+        navigation.navigate('Home', { userData });
+      } else {
+        console.error('No such document!');
+      }
+    } catch (error) {
+      setModalMessage(error.message);
+      console.log(error.message);
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 3000);
+    } finally {
+      setLoading(false);
+    }
+  }
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -71,11 +115,11 @@ const InterestsScreen = ({ navigation }) => {
             {'<'}
           </Text>
       </Pressable>
-      <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('EnableLocation')}>
+      {/* <Pressable style={{alignSelf: 'flex-end', }} onPress={() => navigation.navigate('EnableLocation')}>
           <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, color: "#E94057", lineHeight: 50, marginTop: -50 }}>
             Skip
           </Text>
-      </Pressable>
+      </Pressable> */}
 
       <Text style={styles.title}>Your interests</Text>
       <Text style={styles.subtitle}>Select a few of your interests and let everyone know what you're passionate about.</Text>

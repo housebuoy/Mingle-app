@@ -1,5 +1,5 @@
 import React, { useState} from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity,Pressable, Image, Modal } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity,Pressable, Image, Modal, ActivityIndicator } from 'react-native';
 // import firebase from 'firebase/app';
 import 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';// import DateTimePicker from '@react-native-community/datetimepicker';
@@ -16,7 +16,9 @@ const ProfileScreen = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState(''); 
   const [occupation, setOccupation] = useState(''); 
+  const [userInfo, setUserInfo] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
+  const [isLoading, setIsLoading] = React.useState(false);
   
   
 
@@ -67,28 +69,34 @@ const ProfileScreen = ({ navigation }) => {
   };
 
 
-const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage) => {
+const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage, userInfo) => {
   try {
+    setIsLoading(true);
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       firstName: firstName,
       lastName: lastName,
       occupation: occupation,
       birthdate: date,
+      userInfo: userInfo,
       profileImageUrl: selectedImage,
     });
     console.log('User profile info updated successfully');
   } catch (error) {
     console.error('Error storing profile info:', error);
   }
+  finally {
+    setIsLoading(false);
+  }
 };
 
 const userId = auth.currentUser.uid;
 const handleProfileUpdate = async () => {
   try {
-    await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage);
+    if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && selectedImage !== null && userInfo !== ''){    
+    await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage, userInfo);
     console.log('profile updated');
-    navigation.navigate('Gender');
+    navigation.navigate('Gender');}
   } catch (error) {
     console.error('Error', 'Failed to access location');
     console.error(error);
@@ -133,8 +141,15 @@ const handleProfileUpdate = async () => {
           value={occupation}
           onChangeText={setOccupation}
         />
+                <TextInput
+          style={styles.infoInput}
+          placeholder="More Info"
+          value={userInfo}
+          multiline
+          onChangeText={setUserInfo}
+        />
         <TouchableOpacity style={styles.birthdayButton} onPress={showDatepicker}>
-          <Image source={calendar} style={{width: 18, height: 18}}/>
+          <Image source={calendar} style={{width: 24, height: 24}}/>
           <Text style={styles.birthdayButtonText}>
             {date ? date.toLocaleDateString() : 'Choose Birthday' }
             {show && (
@@ -152,7 +167,11 @@ const handleProfileUpdate = async () => {
           // navigation.navigate('Gender')
           handleProfileUpdate()
           }}>
-          <Text style={styles.profilebuttonText}>Confirm</Text>
+          {isLoading ? (
+              <ActivityIndicator size="large" color="#fff" />
+                ) : (
+              <Text style={styles.profilebuttonText}>Confirm</Text>
+            )}
         </TouchableOpacity>
       </View>
       <Modal
@@ -220,6 +239,18 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold'
   },
   profileinput: {
+    width: '100%',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 25,
+    fontSize: 20,
+    marginBottom: 20,
+    borderRadius: 15,
+    fontFamily: 'Poppins-Bold'
+  },
+  infoInput: {
     width: '100%',
     paddingVertical: 15,
     paddingHorizontal: 20,

@@ -4,7 +4,9 @@ import app from '../utils/firebaseConfig';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { doc, setDoc, getFirestore } from "firebase/firestore"; 
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import 'firebase/firestore';
+import { useUser } from '../context/UseContext';
 // import { db } from '../utils/firebaseConfig'
 // import { registerUser } from '../backend/db';
 const auth = getAuth();
@@ -20,6 +22,7 @@ const EmailInputScreen = ({ navigation }) => {
   const [emailError, setEmailError] = useState('');
   const isFocused = useRef(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const { user } = useUser();
   const inputStyle = [
     styles.input,
     isFocused.current? styles.inputFocused : {}
@@ -86,10 +89,10 @@ const EmailInputScreen = ({ navigation }) => {
 
 
       setIsLoading(true);
-
       const auth = getAuth(app);
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
+      await AsyncStorage.setItem('userToken', auth.currentUser.uid);
       await storeUserData(userId, userName, nameValue, email);
       const response = await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('Success', userId);

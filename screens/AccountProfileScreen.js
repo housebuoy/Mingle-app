@@ -7,18 +7,18 @@ import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 import user from '../assets/images/icons/user-solid-36.png';
 import { Icon } from '@rneui/themed';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, arrayUnion, arrayRemove, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GalleryViewer from '../components/GalleryViewer';
 import * as ImagePicker from 'expo-image-picker';
 import { useUser } from '../context/UseContext';
+import female1 from '../assets/images/user-solid-60.png'
 
 const db = getFirestore();
 const auth = getAuth();
 const AccountProfileScreen = ({navigation}) => {
-  // const { selectedInterests } = useLikedUsers();
   const [galleryImages, setGalleryImages] = useState([]);
   // const [userData, setUserData] = useState(null);
   const [isloading, setIsLoading] = useState(true);
@@ -46,7 +46,7 @@ const AccountProfileScreen = ({navigation}) => {
     }
 
     const pickGalleryImagesAsync = async () => {
-      if (galleryImages.length >= 5) {
+      if ((galleryImages || []).length >= 5) {
         setModalMessage('You can only add up to 5 images');
         setModalVisible(true);
         setTimeout(() => {
@@ -55,7 +55,6 @@ const AccountProfileScreen = ({navigation}) => {
         return;
       }
   
-      // Request camera roll permissions
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
         setModalMessage('Sorry, we need camera roll permissions to select images');
@@ -75,10 +74,9 @@ const AccountProfileScreen = ({navigation}) => {
       if (!result.canceled) {
         setIsLoading(true);
         const auth = getAuth();
-        const user = auth.currentUser;
+        const userId = await AsyncStorage.getItem('userToken');
   
-        if (user) {
-          const userId = user.uid;
+        if (userId) {
           const storage = getStorage();
           const firestore = getFirestore();
   
@@ -90,18 +88,25 @@ const AccountProfileScreen = ({navigation}) => {
                 const metadata = {
                   contentType: 'image/jpeg',
                 };
-                const imageRef = ref(storage, `users/${userId}/${Date.now()}-${asset.fileName}`);
+                const fileName = `${Date.now()}-${asset.fileName}`;
+                const storagePath = `users/${userId}/${fileName}`;
+                const imageRef = ref(storage, storagePath);
                 const snapshot = await uploadBytes(imageRef, blob, metadata);
                 const downloadURL = await getDownloadURL(snapshot.ref);
   
                 const userRef = doc(firestore, 'users', userId);
                 await updateDoc(userRef, {
-                  gallery: arrayUnion(downloadURL),
+                  gallery: arrayUnion({ downloadURL, storagePath }),
                 });
   
-                return downloadURL;
+                return { downloadURL, storagePath };
               } catch (error) {
                 console.error('Error uploading image:', error);
+                setModalMessage('Error uploading image:', error);
+                setModalVisible(true);
+                setTimeout(() => {
+                  setModalVisible(false);
+                }, 3000);
                 return null;
               }
             })
@@ -126,43 +131,51 @@ const AccountProfileScreen = ({navigation}) => {
     };
   
     const removeImage = async (index) => {
-      const imageURL = galleryImages[index];
-      const newGalleryImages = [...galleryImages];
-      newGalleryImages.splice(index, 1);
-      setGalleryImages(newGalleryImages);
+      setIsLoading(true);
   
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (user) {
-        const userId = user.uid;
-        const storage = getStorage();
-        const firestore = getFirestore();
+      try {
+        const auth = getAuth();
+        const userId = await AsyncStorage.getItem('userToken');
   
-        // Reference to the image in Firebase Storage
-        const imageRef = ref(storage, imageURL);
+        if (userId) {
+          const storage = getStorage();
+          const firestore = getFirestore();
   
-        try {
-          // Delete the image from Firebase Storage
+          const image = galleryImages[index];
+          const { storagePath, downloadURL } = image;
+
+          
+  
+          const imageRef = ref(storage, storagePath);
+  
           await deleteObject(imageRef);
   
-          // Update Firestore to remove the image URL from the user's gallery
-        const userRef = doc(firestore, 'users', userId);
-        await updateDoc(userRef, {
-          gallery: arrayRemove(imageURL),
-        });
+          const userRef = doc(firestore, 'users', userId);
+          await updateDoc(userRef, {
+            gallery: arrayRemove({ downloadURL, storagePath }),
+          });
   
-          console.log('Image removed successfully');
-        } catch (error) {
-          console.error('Error removing image:', error);
+          setGalleryImages(galleryImages.filter((_, i) => i !== index));
+        } else {
+          setModalMessage('You need to be signed in to remove images.');
+          setModalVisible(true);
+          setTimeout(() => {
+            setModalVisible(false);
+          }, 1000);
         }
-      } else {
-        setModalMessage('You need to be signed in again to remove images.');
+      } catch (error) {
+        console.error('Error removing image:', error);
+        setModalMessage('Error removing image.');
         setModalVisible(true);
         setTimeout(() => {
           setModalVisible(false);
         }, 1000);
+      } finally {
+        setIsLoading(false);
       }
     };
+    
+    
     
 
     // const fetchUserData = async () => {
@@ -246,7 +259,7 @@ const AccountProfileScreen = ({navigation}) => {
           </View>
           <TouchableOpacity style={styles.topRightNav} onPress={() => navigation.navigate('ProfileUpdate')}>
             <Icon name="user-edit" type='font-awesome-5' size={24} color="#E94057" />
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
@@ -283,7 +296,7 @@ const AccountProfileScreen = ({navigation}) => {
         >
           {userData.userInfo.length > 50
             ? userData.userInfo.slice(0, 76) + '...'
-            : userData.userInfo}
+          : userData.userInfo}
         </Text>
       )}
           </View>
@@ -304,18 +317,16 @@ const AccountProfileScreen = ({navigation}) => {
 
         <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10 }}>
           <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 20 }}>Gallery</Text>
-          <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-            <GalleryViewer images={userData.gallery} onRemoveImage={removeImage} />
+          <View>
+            <GalleryViewer images={galleryImages} onRemoveImage={removeImage} />
             <TouchableOpacity
               style={[styles.galleryTab1]}
               onPress={pickGalleryImagesAsync}
             >
               <Icon name="add-photo-alternate" size={48} color="#E94057" />
             </TouchableOpacity>
-      </View>
-      {/* <TouchableOpacity onPress={handleGalleryUpdate()}>
-        <Icon name="check" size={48} color="#E94057" />
-      </TouchableOpacity> */}
+          </View>
+
       {modalVisible && (
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>

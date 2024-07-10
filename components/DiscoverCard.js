@@ -6,7 +6,7 @@ import { Icon } from 'react-native-elements';
 import { data } from './data'
 import { useLikedUsers } from '../hooks/likedUsersContext';
 
-const DiscoverCard = () => {
+const DiscoverCard = ({usersColection}) => {
       
 
       const [users, setUsers] = useState(data);

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import Welcome from '../screens/Welcome';
 import { createStackNavigator } from '@react-navigation/stack';
 import Onboarding from '../screens/Onboarding';
@@ -16,7 +16,6 @@ import SearchFriendsScreen from '../screens/SearchFriendsScreen.js';
 import AllowNotificationScreen from '../screens/AllowNotificationsScreen.js';
 import ForgotPasswordScreen from '../screens/ForgotPasswordScreen.js';
 import HomeScreen from '../screens/HomeScreen.js';
-import useAuth from '../hooks/useAuth.js';
 import MatchScreen from '../screens/MatchScreen.js';
 import MessageScreen from '../screens/MessageScreen.js';
 import {LikedUsersProvider} from '../hooks/likedUsersContext.js';
@@ -29,10 +28,15 @@ import ProfileUpdate from '../screens/ProfileUpdate.js';
 import UpdateInterests from '../screens/UpdateInterests.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getAuth, signOut, } from 'firebase/auth'
+import { useUser } from '../context/UseContext';
+import firebase from 'firebase/app';
+import 'firebase/auth';
+import 'firebase/firestore';
 
 
 export default function App({profilePicture}) {
     const navigation = useNavigation();
+    const { setUserData } = useUser();
     const handleGoBack = () => {
         navigation.goBack();
     };
@@ -43,6 +47,7 @@ export default function App({profilePicture}) {
           // Remove the user's login token from AsyncStorage
           await AsyncStorage.removeItem('userToken');
           navigation.navigate('Login');
+        //   setUserData(null)
         } catch (error) {
           console.error('Error signing out:', error);
         }

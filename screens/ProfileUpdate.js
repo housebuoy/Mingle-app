@@ -218,7 +218,11 @@ const handleProfileUpdate = async () => {
         <TouchableOpacity style={styles.confirmButton} onPress={() => {
           handleProfileUpdate()
           }}>
-          <Text style={styles.profilebuttonText}>Confirm</Text>
+            {loading ? (
+                <ActivityIndicator size="large" color="#fff" />
+                ) : (
+                <Text style={styles.profilebuttonText}>Confirm</Text>
+            )}
         </TouchableOpacity>
       </View>
       <Modal

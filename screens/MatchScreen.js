@@ -11,19 +11,13 @@ import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
 import { data as users } from '../components/data'
 import { useLikedUsers } from '../hooks/likedUsersContext'
-import { collection, getFirestore,  doc, getDoc, query, getDocs, startAfter, limit, where} from 'firebase/firestore';
+import { collection, getFirestore,  doc, getDoc, query, getDocs, startAfter, limit, where, arrayRemove, updateDoc, arrayUnion} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { differenceInYears } from 'date-fns';
 
-
 const db = getFirestore()
 const auth = getAuth()
-
-
-
-
-
 
 const MatchScreen = ({navigation}) => {
     const [isPopupVisible, setIsPopupVisible] = useState(false);
@@ -33,10 +27,27 @@ const MatchScreen = ({navigation}) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [whoYouLiked, setWhoYouLiked] = useState([]);
+    const [whoLikedYou, setWhoLikedYou] = useState([]);
+    // const [whoLikedYouData, setWhoLikedYouData] = useState([]);
     const [lastVisible, setLastVisible] = useState(null);
     const [allLoaded, setAllLoaded] = useState(false);
     const [currentUserId, setCurrentUserId] = useState('');
     const [users, setUsers] = useState([]);
+    const [matches, setMatches] = useState([]);
+
+    const checkAndUpdateMatches = async (userId, whoYouLiked, whoLikedYou) => {
+      const matches = whoYouLiked.filter(id => whoLikedYou.includes(id));
+      if (matches.length > 0) {
+        try {
+          const userDocRef = doc(db, 'users', userId);
+          await updateDoc(userDocRef, { matches: arrayUnion(...matches) });
+          console.log('Matches updated:', matches);
+        } catch (error) {
+          console.error('Error updating matches:', error);
+        }
+      }
+    };
+
 
     useEffect(() => {
       const fetchCurrentUser = async () => {
@@ -46,8 +57,13 @@ const MatchScreen = ({navigation}) => {
           const userDoc = await getDoc(doc(db, 'users', userId));
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            setWhoYouLiked(userData.whoYouLiked || []);
-            fetchUsers(userData.whoYouLiked || []);
+            const whoYouLikedArray = userData.whoYouLiked || [];
+            const whoLikedYouArray = userData.whoLikedYou || [];
+            setWhoYouLiked(whoYouLikedArray);
+            setWhoLikedYou(whoLikedYouArray); // Set whoLikedYou data
+            fetchUsers(whoYouLikedArray);
+            checkAndUpdateMatches(userId, whoYouLikedArray, whoLikedYouArray);
+            fetchMatches(userId); 
           } else {
             console.log("No such document!");
           }
@@ -109,20 +125,124 @@ const MatchScreen = ({navigation}) => {
       }
     };
   
-
-  const handleActiveIndex = (index) => {
-    if (activeIndex === index) {
-      setActiveIndex(0); // clear active state
-    } else {
-      setActiveIndex(index);
-    }
-  };
-
-    const handleRemove = (id) => {
-      setData((prevData) => prevData.filter(item => item.id !== id));
+    const handleActiveIndex = (index) => {
+      if (activeIndex === index) {
+        setActiveIndex(0); // clear active state
+      } else {
+        setActiveIndex(index);
+      }
+    };
+  
+    const handleRemove = async (id) => {
+      try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        if (!userToken) {
+          throw new Error('No user is signed in');
+        }
+  
+        const firestore = getFirestore();
+        const currentUserRef = doc(firestore, 'users', userToken);
+  
+        // Remove the userId from the "whoYouLiked" array
+        await updateDoc(currentUserRef, {
+          whoYouLiked: arrayRemove(id),
+        });
+        console.log(id, "removed")
+      } catch (error) {
+        console.error('Error removing user from "whoYouLiked":', error);
+      }
     };
 
-  const renderItem = ({ item }) => (
+    const handleWhoLikedYouRemove = async (id) => {
+      try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        if (!userToken) {
+          throw new Error('No user is signed in');
+        }
+  
+        const firestore = getFirestore();
+        const currentUserRef = doc(firestore, 'users', userToken);
+  
+        // Remove the userId from the "whoYouLiked" array
+        await updateDoc(currentUserRef, {
+          whoLikedYou: arrayRemove(id),
+        });
+        console.log(id, "removed")
+      } catch (error) {
+        console.error('Error removing user from "whoLikedYou":', error);
+      }
+    };
+
+    const handleMatchesRemove = async (id) => {
+      try {
+        const userToken = await AsyncStorage.getItem('userToken');
+        if (!userToken) {
+          throw new Error('No user is signed in');
+        }
+  
+        const firestore = getFirestore();
+        const currentUserRef = doc(firestore, 'users', userToken);
+  
+        // Remove the userId from the "whoYouLiked" array
+        await updateDoc(currentUserRef, {
+          whoLikedYou: arrayRemove(id),
+          matches: arrayRemove(id),
+        });
+        console.log(id, "removed")
+      } catch (error) {
+        console.error('Error removing user from "whoLikedYou":', error);
+      }
+    };
+
+    const fetchMatches = async (userToken) => {
+      try {
+        const userDocRef = doc(db, 'users', userToken);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const matchesArray = userData.matches || [];
+    
+          const matchedUsers = await Promise.all(
+            matchesArray.map(async (matchId) => {
+              const matchDoc = await getDoc(doc(db, 'users', matchId));
+              return { ...matchDoc.data(), id: matchDoc.id };
+            })
+          );
+    
+          setMatches(matchedUsers);
+        }
+      } catch (error) {
+        console.error('Error fetching matches:', error);
+      }
+    };
+    
+    
+    // Fetch matched users when matches state updates
+    // useEffect(() => {
+    //   const currentUserId = AsyncStorage.getItem('userToken');
+    //   if (currentUserId) {
+    //     fetchMatches(userToken);
+    //   }
+    // }, [matches]);
+
+  const renderWhoLikeYouItem = ({ item }) => (
+    <TouchableOpacity style={styles.card}>
+      <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
+      <View style={styles.infoContainer}>
+        <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
+        <View style={styles.actionContainer}>
+          <TouchableOpacity onPress={() => handleWhoLikedYouRemove(item.id)}>
+            <Icon name='close' type='font-awesome' color='#fff' size={30} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Icon name='heart' type='font-awesome' color='#fff' size={30} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderWhoYouLikeItem = ({ item }) => (
     <TouchableOpacity style={styles.card}>
       <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
       <View style={styles.infoContainer}>
@@ -131,8 +251,19 @@ const MatchScreen = ({navigation}) => {
           <TouchableOpacity onPress={() => handleRemove(item.id)}>
             <Icon name='close' type='font-awesome' color='#fff' size={30} />
           </TouchableOpacity>
-          <TouchableOpacity>
-            <Icon name='heart' type='font-awesome' color='#fff' size={30} />
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  const renderMatchItem = ({ item }) => (
+    <TouchableOpacity style={styles.card}>
+      <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
+      <View style={styles.infoContainer}>
+        <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
+        <View style={styles.actionContainer}>
+          <TouchableOpacity onPress={() => handleMatchesRemove(item.id)}>
+            <Icon name='close' type='font-awesome' color='#fff' size={30} />
           </TouchableOpacity>
         </View>
       </View>
@@ -217,11 +348,11 @@ const MatchScreen = ({navigation}) => {
           </TouchableOpacity>
         </View>
       )}
-      {activeIndex === 2 ? (
+      {activeIndex === 1 ? (
         <View style={styles.viewContainer}>
           <FlatList
-            data={data}
-            renderItem={renderItem}
+            data={whoYouLiked.map(id => users.find(user => user.id === id)).filter(Boolean)}
+            renderItem={renderWhoYouLikeItem}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
@@ -233,12 +364,28 @@ const MatchScreen = ({navigation}) => {
           />
         </View>
       ) : null}
-      {activeIndex === 1 ? (
+      {activeIndex === 2 ? (
         <View style={styles.viewContainer}>
           <FlatList
-            data={whoYouLiked.map(id => users.find(user => user.id === id)).filter(Boolean)} // Filter out undefined users
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id.toString()} // Ensure id exists before calling toString()
+            data={whoLikedYou.map(id => users.find(user => user.id === id)).filter(Boolean)}
+            renderItem={renderWhoLikeYouItem}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            style={styles.flatList}
+            numColumns={2}
+            onEndReached={fetchMoreUsers}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={loading && <ActivityIndicator size="large" color="#e94057" />}
+          />
+        </View>
+      ) : null}
+      {activeIndex === 0 ? (
+        <View style={styles.viewContainer}>
+          <FlatList
+            data={matches}
+            renderItem={renderMatchItem}
+            keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContainer}
             showsVerticalScrollIndicator={false}
             style={styles.flatList}

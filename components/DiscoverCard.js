@@ -20,6 +20,20 @@ const DiscoverCard = () => {
       const [error, setError] = useState(null);
       const swiperRef = useRef(null);
 
+      // const checkAndUpdateMatches = async (userId, whoYouLiked, whoLikedYou) => {
+      //   const matches = whoYouLiked.filter(id => whoLikedYou.includes(id));
+      //   if (matches.length > 0) {
+      //     try {
+      //       const userDocRef = doc(db, 'users', userId);
+      //       await updateDoc(userDocRef, { matches: arrayUnion(...matches) });
+      //       console.log('Matches updated:', matches);
+      //     } catch (error) {
+      //       console.error('Error updating matches:', error);
+      //     }
+      //   }
+      // };
+      
+
       const fetchUsers = async (currentUserId) => {
         try {
           const querySnapshot = await getDocs(collection(db, 'users'));
@@ -146,6 +160,7 @@ const DiscoverCard = () => {
           })
             .then(() => {
               console.log('Updated Firestore with whoLikedYou array');
+              // checkAndUpdateMatches(currentUserId, updatedWhoYouLiked, whoLikedYou);
             })
             .catch((error) => {
               console.error('Error updating Firestore:', error);

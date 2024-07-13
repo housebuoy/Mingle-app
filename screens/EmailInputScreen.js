@@ -48,7 +48,7 @@ const EmailInputScreen = ({ navigation }) => {
 
   const handleContinuePress = () => {
     if (validateForm()) {
-    setModalMessage("Check your email to verify and login");
+    setModalMessage("Wait as we set your table");
     setModalVisible(true);
     registerAndLogin()
     setTimeout(() => {

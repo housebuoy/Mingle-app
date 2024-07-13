@@ -49,7 +49,6 @@ const ProfileScreen = ({ navigation }) => {
   };
 
 
-  //Image Picker
   const pickImageAsync = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
@@ -58,9 +57,9 @@ const ProfileScreen = ({ navigation }) => {
     });
   
     if (!result.canceled) {
+      await uploadProfileImage(result.assets[0].uri);
       setSelectedImage(result.assets[0].uri);
       setModalVisible(false);
-      await uploadProfileImage(result.assets[0].uri); // Ensure result.assets[0].uri is a string
     } else {
       setModalMessage("You didn't add a profile pic");
       setModalVisible(true);
@@ -69,67 +68,65 @@ const ProfileScreen = ({ navigation }) => {
       }, 1000);
     }
   };
-
-  const uploadProfileImage = async (imageUri) => {
-  setLoading(true);
-
-  try {
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error('No user is signed in');
-    }
-
-    const userId = user.uid;
-    const storage = getStorage();
-    const storageRef = ref(storage, `users/${userId}/profile.jpg`);
-
-    // Convert the image to a blob
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-
-    // Upload the blob to Firebase Storage
-    const snapshot = await uploadBytes(storageRef, blob);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-
-    // Save the download URL to Firestore
-    const firestore = getFirestore();
-    const userRef = doc(firestore, 'users', userId);
-    await updateDoc(userRef, {
-      profileImageUrl: downloadURL,
-    });
-
-    console.log('Profile image uploaded and URL saved to Firestore');
-  } catch (error) {
-    console.error('Error uploading profile image:', error);
-    setModalMessage('Failed to upload profile image');
-    setModalVisible(true);
-    setTimeout(() => {
-      setModalVisible(false);
-    }, 1000);
-  } finally {
-    setLoading(false);
-  }
-};
-
   
-
-const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage, userInfo) => {
-  try {
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      firstName: firstName,
-      lastName: lastName,
-      occupation: occupation,
-      birthdate: date,
-      profileImageUrl: selectedImage,
-      userInfo: userInfo,
-    });
-    console.log('User profile info updated successfully');
-  } catch (error) {
-    console.error('Error storing profile info:', error);
-  }
-};
+  const uploadProfileImage = async (imageUri) => {
+    setLoading(true);
+  
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No user is signed in');
+      }
+  
+      const userId = user.uid;
+      const storage = getStorage();
+      const storageRef = ref(storage, `users/${userId}/profile.jpg`);
+  
+      // Convert the image to a blob
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+  
+      // Upload the blob to Firebase Storage
+      const snapshot = await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+  
+      // Save the download URL to Firestore
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', userId);
+      await updateDoc(userRef, {
+        profileImageUrl: downloadURL,
+      });
+  
+      console.log('Profile image uploaded and URL saved to Firestore');
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      setModalMessage('Failed to upload profile image');
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 1000);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage, userInfo) => {
+    try {
+      const userRef = doc(db, "users", userId);
+      await updateDoc(userRef, {
+        firstName: firstName,
+        lastName: lastName,
+        occupation: occupation,
+        birthdate: date,
+        profileImageUrl: selectedImage, // Use the selected image URL from Firebase Storage
+        userInfo: userInfo,
+      });
+      console.log('User profile info updated successfully');
+    } catch (error) {
+      console.error('Error storing profile info:', error);
+    }
+  };
 
 
 const handleProfileUpdate = async () => {
@@ -148,7 +145,7 @@ const handleProfileUpdate = async () => {
     }
     
   } catch (error) {
-    console.error('Error', 'Failed to access location');
+    console.error('Error', 'Failed to update profile');
     console.error(error);
   }
 };

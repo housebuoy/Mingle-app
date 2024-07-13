@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Pressable } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TouchableOpacity, ScrollView, Pressable , Modal} from 'react-native';
 import { useLikedUsers } from '../hooks/likedUsersContext';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { differenceInYears } from 'date-fns';
 import { useUser } from '../context/UseContext';
@@ -12,7 +12,11 @@ import { useUser } from '../context/UseContext';
 const db = getFirestore();
 const auth = getAuth();
 const InterestsScreen = ({ navigation }) => {
+  const [error, setError] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
   const { selectedInterests, setSelectedInterests } = useLikedUsers();
+  const [loading, setLoading] = useState(false);
   const { setUserData } = useUser();
 
   const toggleInterest = (interest) => {
@@ -50,6 +54,11 @@ const InterestsScreen = ({ navigation }) => {
       console.log('User interests updated successfully');
     } catch (error) {
       setError('Error storing interest: ' + error.message);
+      setModalMessage(error);
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 3000);
       console.error('Error storing interest:', error);
     }
   };
@@ -71,7 +80,7 @@ const InterestsScreen = ({ navigation }) => {
 
   async function fetchUserData(userId) {
     setLoading(true);
-    setError(null);
+    // setError(null);
     try {
       // Fetch user data
       const userRef = doc(getFirestore(), 'users', userId);
@@ -150,6 +159,20 @@ const InterestsScreen = ({ navigation }) => {
       >
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
+      <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                closeModal();
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{modalMessage}</Text>
+            </View>
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 };
@@ -221,4 +244,22 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontSize: 22,
   },
+  modalView: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  }
 })

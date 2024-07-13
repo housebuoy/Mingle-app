@@ -14,42 +14,52 @@ export const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [storedUserId, setStoredUserId] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         // Check if user data is already stored in AsyncStorage
         const storedUserData = await AsyncStorage.getItem('userdata');
-        if (storedUserData) {
-          const parsedUserData = JSON.parse(storedUserData);
-          setUserData(parsedUserData);
-          setLoading(false);
-          return;
-        }
+        
 
         // If user data is not in AsyncStorage, fetch it from Firestore
-        const userId = await AsyncStorage.getItem('userToken');
-        if (userId) {
-          const userRef = doc(getFirestore(), 'users', userId);
-          const docSnap = await getDoc(userRef);
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            // Calculating age
-            const birthdate = new Date(userData.birthdate.toDate());
-            const age = differenceInYears(new Date(), birthdate);
-            const gallery = userData.gallery || [];
+        const userToken = await AsyncStorage.getItem('userToken');
+        if (userToken) {
+          if (userToken !== storedUserId) {
+            // Fetch user data from Firestore
+            const userRef = doc(getFirestore(), 'users', userToken);
+            const docSnap = await getDoc(userRef);
+            if (docSnap.exists()) {
+              const userData = docSnap.data();
+              // Calculating age
+              const birthdate = new Date(userData.birthdate.toDate());
+              const age = differenceInYears(new Date(), birthdate);
+              const gallery = userData.gallery || [];
 
-            const updatedUserData = {
-              ...userData,
-              age,
-              gallery,
-            };
+              const updatedUserData = {
+                ...userData,
+                age,
+                gallery,
+              };
 
-            // Save user data to AsyncStorage
-            await AsyncStorage.setItem('userdata', JSON.stringify(updatedUserData));
-            setUserData(updatedUserData);
+              // Save user data to AsyncStorage
+              await AsyncStorage.setItem('userdata', JSON.stringify(updatedUserData));
+              await AsyncStorage.setItem('userToken', userToken);
+              setStoredUserId(userToken);
+              setUserData(updatedUserData);
+            } else {
+              console.error('No such document!');
+            }
           } else {
-            console.error('No such document!');
+            // User data is already in AsyncStorage, no need to fetch from Firestore
+            if (storedUserData) {
+              const parsedUserData = JSON.parse(storedUserData);
+              setUserData(parsedUserData);
+              setLoading(false);
+              return;
+            }
+            setLoading(false);
           }
         } else {
           console.error('No user is signed in');

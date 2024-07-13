@@ -3,16 +3,14 @@ import React, { useState, useRef, useEffect, } from 'react'
 import Swiper from 'react-native-deck-swiper';
 import { Icon } from 'react-native-elements';
 import { useLikedUsers } from '../hooks/likedUsersContext';
-import { collection, getDocs, getFirestore,  doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, getFirestore,  doc, setDoc, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
 const db = getFirestore()
-const DiscoverCard = () => {
-      
-      
+const DiscoverCard = () => {         
       const auth = getAuth();
       const [users, setUsers] = useState([]);
       const [whoYouLiked, setWhoYouLiked] = useState([]);
@@ -22,11 +20,6 @@ const DiscoverCard = () => {
       const [error, setError] = useState(null);
       const swiperRef = useRef(null);
 
-      // const auth = getAuth()
-
-// const currentUser = auth.currentUser;
-// console.log(currentUser)
-// const currentUserId = currentUser ? currentUser.uid : null;
       const fetchUsers = async (currentUserId) => {
         try {
           const querySnapshot = await getDocs(collection(db, 'users'));
@@ -131,26 +124,36 @@ const DiscoverCard = () => {
         const currentUserId = await AsyncStorage.getItem('userToken');
       
         if (currentUserId) {
-          setWhoYouLiked((prevWhoYouLiked) => {
-            const updatedWhoYouLiked = [...prevWhoYouLiked, likedUserId];
+          // Retrieve the current user's 'whoYouLiked' array from Firestore
+          const currentUserDocRef = doc(db, 'users', currentUserId);
+          const currentUserDoc = await getDoc(currentUserDocRef);
+          const currentUserData = currentUserDoc.data();
+          const currentWhoYouLiked = currentUserData.whoYouLiked || [];
       
-            // Update Firestore with the new whoYouLiked array
-            const userDocRef = doc(db, 'users', currentUserId);
-            updateDoc(userDocRef, {
-              whoYouLiked: updatedWhoYouLiked,
+          // Update the 'whoYouLiked' array and save it to Firestore
+          const updatedWhoYouLiked = [...currentWhoYouLiked, likedUserId];
+          await updateDoc(currentUserDocRef, {
+            whoYouLiked: updatedWhoYouLiked,
+          });      
+          // Update the local 'whoYouLiked' state
+          setWhoYouLiked(updatedWhoYouLiked);
+
+      
+          // Update the whoLikedYou array in the liked user's document
+          const likedUserDocRef = doc(db, 'users', likedUserId);
+          updateDoc(likedUserDocRef, {
+            whoLikedYou: arrayUnion(currentUserId),
+          })
+            .then(() => {
+              console.log('Updated Firestore with whoLikedYou array');
             })
-              .then(() => {
-                console.log('Updated Firestore with whoYouLiked array');
-              })
-              .catch((error) => {
-                console.error('Error updating Firestore:', error);
-              });
-      
-            return updatedWhoYouLiked;
-          });
+            .catch((error) => {
+              console.error('Error updating Firestore:', error);
+            });
         }
       };
       
+
       const handleSwipeTop = (cardIndex) => {
         console.log('Super liked:', users[cardIndex].name);
       };
@@ -173,15 +176,7 @@ const DiscoverCard = () => {
           </View>
         );
       };
-    
-      // if (loading) {
-      //   return (
-      //     <View style={styles.loaderContainer}>
-      //       <ActivityIndicator size="large" color="#e94057" />
-      //     </View>
-      //   );
-      // }
-    
+        
       if (error) {
         return (
           <View style={styles.errorContainer}>
@@ -202,8 +197,7 @@ const DiscoverCard = () => {
             <TouchableOpacity onPress={handleRetry} style={styles.retryButton}>
               <Text style={styles.retryButtonText}>Reload</Text>
             </TouchableOpacity>
-          </View>
-          
+          </View>          
             {loading ? (
                 <View style={styles.loaderContainer}>
                    <ActivityIndicator size="large" color="#e94057" />

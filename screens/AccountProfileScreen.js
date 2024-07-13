@@ -34,15 +34,7 @@ const AccountProfileScreen = ({navigation}) => {
 
   const data = 
     {
-      id: '1',
-      name: 'Jessica Parker',
-      age: 23,
-      profession: 'Professional model',
-      location: 'Chicago, Ghana',
       distance: '1 km',
-      image: require('../assets/images/photo.png'),
-      activity: require('../assets/images/photo.png'),
-      about: 'My name is Jessica Parker and I enjoy meeting new people and finding ways to help them have an uplifting experience. I enjoy reading..',
     }
 
     const pickGalleryImagesAsync = async () => {

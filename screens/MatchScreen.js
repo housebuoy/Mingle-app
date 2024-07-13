@@ -14,6 +14,7 @@ import { useLikedUsers } from '../hooks/likedUsersContext'
 import { collection, getFirestore,  doc, getDoc, query, getDocs, startAfter, limit, where} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { differenceInYears } from 'date-fns';
 
 
 const db = getFirestore()
@@ -125,7 +126,7 @@ const MatchScreen = ({navigation}) => {
     <TouchableOpacity style={styles.card}>
       <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
       <View style={styles.infoContainer}>
-        <Text style={styles.name}>{item.name.split(' ')[0]}, {item.age}</Text>
+        <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
         <View style={styles.actionContainer}>
           <TouchableOpacity onPress={() => handleRemove(item.id)}>
             <Icon name='close' type='font-awesome' color='#fff' size={30} />

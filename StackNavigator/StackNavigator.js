@@ -32,6 +32,7 @@ import { useUser } from '../context/UseContext';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import UpdateGender from '../screens/UpdateGender.js';
 
 
 export default function App({profilePicture}) {
@@ -116,6 +117,12 @@ export default function App({profilePicture}) {
             <Stack.Screen 
             name="Gender" 
             component={GenderScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="UpdateGender" 
+            component={UpdateGender}
             options={{
                 headerShown: false,
             }} />

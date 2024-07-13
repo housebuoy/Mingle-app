@@ -132,6 +132,7 @@ const saveProfileToFirestore = async (userId, firstName, lastName, occupation, d
 
 const handleProfileUpdate = async () => {
   try {
+    setLoading(true)
     const userId = await AsyncStorage.getItem('userToken');
     if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && selectedImage !== null && userInfo !== ''){
         await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage, userInfo);
@@ -142,18 +143,10 @@ const handleProfileUpdate = async () => {
   } catch (error) {
     console.error('Error', 'Failed to access location');
     console.error(error);
+  }finally {
+    setLoading(false);
   }
 };
-
-// const placeholderSource ={
-//     let profilePic = userData.profileImageUrl
-//     if (){
-        
-//     }
-// }
-
-
-   
 
 
   return (
@@ -195,13 +188,20 @@ const handleProfileUpdate = async () => {
           multiline
           onChangeText={setUserInfo}
         />
-        <TouchableOpacity style={[styles.birthdayButton]} onPress={() => {
+        <View style={{flexDirection: 'row', justifyContent:'space-between', gap: 2}}>
+        <TouchableOpacity style={[styles.Button]} onPress={() => {
             navigation.navigate('InterestUpdate')
           }}>
           <Text style={styles.birthdayButtonText}>Update Interests</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={[styles.Button]} onPress={() => {
+            navigation.navigate('UpdateGender')
+          }}>
+          <Text style={styles.birthdayButtonText}>Update Gender</Text>
+        </TouchableOpacity>
+        </View>
         <TouchableOpacity style={styles.birthdayButton} onPress={showDatepicker}>
-          <Image source={calendar} style={{width: 18, height: 18}}/>
+          <Image source={calendar} style={{width: 25, height: 18}}/>
           <Text style={styles.birthdayButtonText}>
             {date ? date.toLocaleDateString() : 'Choose Birthday' }
             {show && (
@@ -321,6 +321,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 3,
     width: '100%',
+    justifyContent : "center",
+    flexDirection: 'row',
+    gap: 10
+  },
+  Button: {
+    backgroundColor: '#FDECEE',
+    paddingVertical: 10,
+    paddingHorizontal: 0,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 3,
+    width: '49%',
     justifyContent : "center",
     flexDirection: 'row',
     gap: 10

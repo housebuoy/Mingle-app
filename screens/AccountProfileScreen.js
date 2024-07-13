@@ -46,6 +46,7 @@ const AccountProfileScreen = ({navigation}) => {
     }
 
     const pickGalleryImagesAsync = async () => {
+      console.log(userData.userId)
       if ((galleryImages || []).length >= 5) {
         setModalMessage('You can only add up to 5 images');
         setModalVisible(true);
@@ -102,7 +103,7 @@ const AccountProfileScreen = ({navigation}) => {
                 return { downloadURL, storagePath };
               } catch (error) {
                 console.error('Error uploading image:', error);
-                setModalMessage('Error uploading image:', error);
+                setModalMessage('Error uploading image; Sign in again to grant access', error);
                 setModalVisible(true);
                 setTimeout(() => {
                   setModalVisible(false);
@@ -260,6 +261,18 @@ const AccountProfileScreen = ({navigation}) => {
           <TouchableOpacity style={styles.topRightNav} onPress={() => navigation.navigate('ProfileUpdate')}>
             <Icon name="user-edit" type='font-awesome-5' size={24} color="#E94057" />
           </TouchableOpacity>
+        </View>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
+          <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
+            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Gender</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.gender}</Text>
+          </View>
+        </View>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
+          <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
+            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Email Adress</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.email}</Text>
+          </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>

@@ -153,6 +153,8 @@ const EmailInputScreen = ({ navigation }) => {
                 onBlur={() => (isFocused.current = false)}
                 placeholder="Enter Email address"
                 value={email}
+                autoCapitalize='none'
+                autoCorrect={false}
                 keyboardType="email-address"
                 onChangeText={(text) => {
                   setEmail(text);
@@ -173,6 +175,7 @@ const EmailInputScreen = ({ navigation }) => {
                 placeholder="Enter Password"
                 value={password}
                 onChangeText={setPassword}
+                autoCapitalize='none'
                 secureTextEntry={true}
                 required
               />

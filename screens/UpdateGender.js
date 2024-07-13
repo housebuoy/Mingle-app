@@ -7,7 +7,7 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 const db = getFirestore();
 const auth = getAuth();
 
-const GenderScreen = ({ navigation }) => {
+const UpdateGender = ({ navigation }) => {
   const [selectedGender, setSelectedGender] = useState('');
   const [error, setError] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,7 +41,7 @@ const GenderScreen = ({ navigation }) => {
       await saveGenderToFirestore(userId, selectedGender);
       console.log('Gender updated');
       if(selectedGender !== null){
-        navigation.navigate('Interests');
+        navigation.navigate('ProfileUpdate');
       }else{
         setModalMessage("Please fill all required fields!");
         setModalVisible(true);
@@ -127,7 +127,7 @@ const GenderScreen = ({ navigation }) => {
   );
 };
 
-export default GenderScreen;
+export default UpdateGender;
 
 const styles = StyleSheet.create({
   gendercontainer: {

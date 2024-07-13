@@ -134,6 +134,8 @@ const Login = ({ navigation }) => {
               onBlur={() => (isFocused.current = false)}
               placeholder="Enter Email address"
               value={email}
+              autoCapitalize='none'
+              autoCorrect={false}
               keyboardType="email-address"
               onChangeText={(text) => {
                 setEmail(text);
@@ -153,6 +155,8 @@ const Login = ({ navigation }) => {
                 // keyboardType="visible-password"
                 placeholder="Enter Password"
                 value={password}
+                autoCapitalize='none'
+                autoCorrect={false}
                 onChangeText={setPassword}
                 secureTextEntry={true}
                 required

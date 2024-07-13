@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, Image } from 'react-native';
 // import { SafeAreaView } from 'react-native-safe-area-context';
 import logo from '../assets/images/logo.png';
+import mingle from '../assets/images/mingle.png';
 import fonts from '../components/Fonts'
 // import { useFonts } from 'expo-font';
 // import * as SplashScreen from 'expo-splash-screen';
@@ -48,7 +49,7 @@ const Welcome = () => {
     <View style={styles.container}>
       <View style={styles.contentContainer}>
         <Image source={logo} style={styles.logo} resizeMode="contain" />
-        <Text style={styles.logoText}>mingle</Text>
+        <Image source={mingle} style={styles.logoText} resizeMode="contain" />
       </View>
       <View style={styles.subContainer}>
         <Text style={styles.subText}>Powered by</Text>
@@ -85,15 +86,13 @@ const styles = StyleSheet.create({
     height: 200,
   },
   logoText: {
-    fontSize: 64,
-    fontFamily: 'GrandHotel-Regular',
-    color: '#000',
-    marginLeft: 20
+    width: 120,
+    height: 80,
   },
   subLogoText: {
-    fontSize: 24,
-    fontFamily: 'GrandHotel-Regular',
-    color: '#690002'
+    fontSize: 16,
+    fontFamily: 'Poppins-Bold',
+    color: '#e94057'
   },
   subText: {
     fontSize: 16,

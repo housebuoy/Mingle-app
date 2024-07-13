@@ -4,11 +4,13 @@ import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity,Press
 import 'firebase/firestore';
 import DateTimePicker from '@react-native-community/datetimepicker';// import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker';
-import female1 from '../assets/images/onboarding/female1.png'
+import female1 from '../assets/images/user-solid-60.png'
 import calendar from '../assets/images/calendar-solid-24.png'
 import ImageViewer from '../components/ImageViewer';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const db = getFirestore();
 const auth = getAuth();
@@ -19,7 +21,8 @@ const ProfileScreen = ({ navigation }) => {
   const [userInfo, setUserInfo] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
   const [isLoading, setIsLoading] = React.useState(false);
-  
+  const [loading, setLoading] = useState(false);
+ 
   
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -51,52 +54,99 @@ const ProfileScreen = ({ navigation }) => {
     let result = await ImagePicker.launchImageLibraryAsync({
       allowsEditing: true,
       quality: 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
     });
-
+  
     if (!result.canceled) {
-      console.log(result);
-      setSelectedImage(result.assets[0].uri)
+      setSelectedImage(result.assets[0].uri);
       setModalVisible(false);
+      await uploadProfileImage(result.assets[0].uri); // Ensure result.assets[0].uri is a string
     } else {
       setModalMessage("You didn't add a profile pic");
       setModalVisible(true);
       setTimeout(() => {
         setModalVisible(false);
       }, 1000);
-    return true;
     }
   };
 
+  const uploadProfileImage = async (imageUri) => {
+  setLoading(true);
+
+  try {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('No user is signed in');
+    }
+
+    const userId = user.uid;
+    const storage = getStorage();
+    const storageRef = ref(storage, `users/${userId}/profile.jpg`);
+
+    // Convert the image to a blob
+    const response = await fetch(imageUri);
+    const blob = await response.blob();
+
+    // Upload the blob to Firebase Storage
+    const snapshot = await uploadBytes(storageRef, blob);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+
+    // Save the download URL to Firestore
+    const firestore = getFirestore();
+    const userRef = doc(firestore, 'users', userId);
+    await updateDoc(userRef, {
+      profileImageUrl: downloadURL,
+    });
+
+    console.log('Profile image uploaded and URL saved to Firestore');
+  } catch (error) {
+    console.error('Error uploading profile image:', error);
+    setModalMessage('Failed to upload profile image');
+    setModalVisible(true);
+    setTimeout(() => {
+      setModalVisible(false);
+    }, 1000);
+  } finally {
+    setLoading(false);
+  }
+};
+
+  
 
 const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage, userInfo) => {
   try {
-    setIsLoading(true);
     const userRef = doc(db, "users", userId);
     await updateDoc(userRef, {
       firstName: firstName,
       lastName: lastName,
       occupation: occupation,
       birthdate: date,
-      userInfo: userInfo,
       profileImageUrl: selectedImage,
+      userInfo: userInfo,
     });
     console.log('User profile info updated successfully');
   } catch (error) {
     console.error('Error storing profile info:', error);
   }
-  finally {
-    setIsLoading(false);
-  }
 };
 
-const userId = auth.currentUser.uid;
+
 const handleProfileUpdate = async () => {
   try {
-    if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && selectedImage !== null && userInfo !== ''){    
-    await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage, userInfo);
-    console.log('profile updated');
-    navigation.navigate('Gender');}
+    const userId = await AsyncStorage.getItem('userToken');
+    if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && selectedImage !== null && userInfo !== ''){
+        await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage, userInfo);
+            console.log('profile updated');
+            navigation.navigate('Gender')
+    }else{
+      setModalMessage('Please fill all fields including the profile image');
+      setModalVisible(true);
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 1000);
+    }
+    
   } catch (error) {
     console.error('Error', 'Failed to access location');
     console.error(error);
@@ -164,13 +214,12 @@ const handleProfileUpdate = async () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.confirmButton} onPress={() => {
-          // navigation.navigate('Gender')
           handleProfileUpdate()
           }}>
-          {isLoading ? (
-              <ActivityIndicator size="large" color="#fff" />
+            {loading ? (
+                <ActivityIndicator size="large" color="#fff" />
                 ) : (
-              <Text style={styles.profilebuttonText}>Confirm</Text>
+                <Text style={styles.profilebuttonText}>Confirm</Text>
             )}
         </TouchableOpacity>
       </View>

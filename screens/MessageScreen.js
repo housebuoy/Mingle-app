@@ -15,7 +15,6 @@ import { Icon } from '@rneui/themed';
 import { data } from '../components/data'
 import { useUser } from '../context/UseContext';
 
-
 const MessageScreen = ({navigation}) => {
 
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
@@ -23,7 +22,7 @@ const MessageScreen = ({navigation}) => {
   const [showFlatList, setShowFlatList] = useState(false);
   const [matches, setMatches] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [lastMessages, setLastMessages] = useState([])
+  const [lastMessages, setLastMessages] = useState({});
   const { userData } = useUser();
 
   const db = getFirestore();
@@ -36,19 +35,52 @@ const MessageScreen = ({navigation}) => {
     }
   };
 
+  const getLastMessage = async (chatRoomId, reverseChatRoomId) => {
+    try {
+      const chatRoomDoc = await getDoc(doc(db, 'messages', chatRoomId));
+      const reverseChatRoomDoc = await getDoc(doc(db, 'messages', reverseChatRoomId));
+      let lastMessage = null;
+  
+      if (chatRoomDoc.exists()) {
+        const messages = chatRoomDoc.data().messages;
+        if (messages.length > 0) {
+          lastMessage = messages[messages.length - 1];
+        }
+      } else if (reverseChatRoomDoc.exists()) {
+        const messages = reverseChatRoomDoc.data().messages;
+        if (messages.length > 0) {
+          lastMessage = messages[messages.length - 1];
+        }
+      }
+  
+      return lastMessage;
+    } catch (error) {
+      console.error('Error fetching last message:', error);
+      return null;
+    }
+  };
+
   useEffect(() => {
     const fetchLastMessages = async () => {
-      const q = query(collection(db, 'messages'));
-      const querySnapshot = await getDocs(q);
-      const messages = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data().lastMessage // Get the lastMessage field
+      const userToken = await AsyncStorage.getItem('userToken');
+      if (!userToken) return;
+  
+      const updatedMatches = await Promise.all(matches.map(async (match) => {
+        const chatRoomId = `${match.id}-${userToken}`;
+        const reverseChatRoomId = `${userToken}-${match.id}`;
+        const lastMsg = await getLastMessage(chatRoomId, reverseChatRoomId);
+        return { ...match, lastMessage: lastMsg };
       }));
-      setLastMessages(messages);
+  
+      setMatches(updatedMatches);
     };
-
-    fetchLastMessages();
-  }, []);
+  
+    if (matches.length > 0) {
+      fetchLastMessages();
+    }
+  }, [matches]);
+  
+  
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -106,17 +138,24 @@ const MessageScreen = ({navigation}) => {
     setFilteredData(matches.filter(item => item.username.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText, matches]);
 
-  const renderItem = ({ item }) => (
+
+  
+
+  const renderItem = ({ item }) => {
+    const lastMessageText = item.lastMessage ? item.lastMessage.text : 'No messages yet';
+    const lastMessageTime = item.lastMessage ? new Date(item.lastMessage.timestamp.seconds * 1000).toLocaleTimeString() : '';
+
+    return(
     <View style={styles.userContainer}>
       <Image source={item.profileImageUrl? { uri: item.profileImageUrl }: user} style={styles.userImage} />
       <TouchableOpacity style={styles.userInfo} onPress={() => navigation.navigate('Chat', { userId: item.id, userName: item.username, profilePicture: item.profileImageUrl })}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
           <Text style={styles.userName}>{item.username}</Text>
-          <Text style={styles.userTime}>20 mins</Text>
+          <Text style={styles.userTime}>{lastMessageTime}</Text>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
-          <Text style={styles.userText}>{item.userInfo.length > 23 ? item.userInfo.slice(0, 23) + '...' : item.userInfo}</Text>
-          {item.unread == undefined && (
+          <Text style={styles.userText}>{lastMessageText.length > 23 ? lastMessageText.slice(0, 23) + '...' : lastMessageText}</Text>
+          {/* {item.unread == undefined && (
             <View style={{
               alignItems: 'center',
               justifyContent: 'center',
@@ -133,11 +172,11 @@ const MessageScreen = ({navigation}) => {
                 {item.unread > 99 ? '99+' : item.unread}
               </Text>
             </View>
-          )}
+          )} */}
         </View>
       </TouchableOpacity>
     </View>
-  );
+  )};
 
   const renderSearchItem = ({ item }) => (
     <View style={styles.userContainer}>
@@ -152,7 +191,6 @@ const MessageScreen = ({navigation}) => {
 
   const renderActivity = ({ item }) => (
     <View style={styles.activityContainer}>
-
         <>
             <Image source={{ uri: item.profileImageUrl }} style={styles.userImage} />
             <Text style={{fontFamily:'Poppins-Bold', fontSize: 12}}>{item.name.split(' ')[0]}</Text>

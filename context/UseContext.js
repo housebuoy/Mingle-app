@@ -13,6 +13,7 @@ export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [lastMessages, setLastMessages] = useState([])
   const [error, setError] = useState(null);
   const [storedUserId, setStoredUserId] = useState(null);
 

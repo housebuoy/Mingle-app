@@ -87,6 +87,11 @@ const Login = ({ navigation }) => {
         navigation.navigate('Home');
       } else {
         console.error('No such document!');
+        setModalMessage('User dosent exist! Create an account and get started');
+        setModalVisible(true);
+        setTimeout(() => {
+          setModalVisible(false);
+        }, 3000);
       }
     } catch (error) {
       setModalMessage(error.message);

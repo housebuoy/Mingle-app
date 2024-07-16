@@ -47,6 +47,7 @@ export default function App({profilePicture}) {
           await signOut(auth);
           // Remove the user's login token from AsyncStorage
           await AsyncStorage.removeItem('userToken');
+          await AsyncStorage.removeItem('matchesData');
           navigation.navigate('Login');
         //   setUserData(null)
         } catch (error) {
@@ -190,7 +191,7 @@ export default function App({profilePicture}) {
                 headerLeft: () => (
                     <View style={{ flexDirection: 'row', alignItems: 'space-between',}}>
                       <Image
-                        source={ route.params.profilePicture }
+                        source={{uri: route.params.profilePicture} }
                         style={{ width: 50, height: 50, borderRadius: 30, marginLeft: 25 }}
                         resizeMode='cover'
                       />

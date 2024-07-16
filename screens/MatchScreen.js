@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity, ActivityIndicator, Modal, Alert } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import BottomNavBar from '../components/BottomNavBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -11,7 +11,7 @@ import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
 import { data as users } from '../components/data'
 import { useLikedUsers } from '../hooks/likedUsersContext'
-import { collection, getFirestore,  doc, getDoc, query, getDocs, startAfter, limit, where, arrayRemove, updateDoc, arrayUnion} from 'firebase/firestore';
+import { collection, getFirestore,  doc, getDoc, query, getDocs, setDoc, startAfter, limit, where, arrayRemove, updateDoc, arrayUnion} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { differenceInYears } from 'date-fns';
@@ -34,6 +34,8 @@ const MatchScreen = ({navigation}) => {
     const [currentUserId, setCurrentUserId] = useState('');
     const [users, setUsers] = useState([]);
     const [matches, setMatches] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
 
     const checkAndUpdateMatches = async (userId, whoYouLiked, whoLikedYou) => {
       const matches = whoYouLiked.filter(id => whoLikedYou.includes(id));
@@ -42,11 +44,38 @@ const MatchScreen = ({navigation}) => {
           const userDocRef = doc(db, 'users', userId);
           await updateDoc(userDocRef, { matches: arrayUnion(...matches) });
           console.log('Matches updated:', matches);
+    
+          // Create chat rooms for each match
+          for (const matchId of matches) {
+            const chatRoomId = `${userId}-${matchId}`;
+            const reverseChatRoomId = `${matchId}-${userId}`;
+            
+            // Check if the chat room already exists in either order
+            const chatRoomRef = doc(db, 'messages', chatRoomId);
+            const reverseChatRoomRef = doc(db, 'messages', reverseChatRoomId);
+            
+            const chatRoomDoc = await getDoc(chatRoomRef);
+            const reverseChatRoomDoc = await getDoc(reverseChatRoomRef);
+            
+            if (!chatRoomDoc.exists() && !reverseChatRoomDoc.exists()) {
+              await setDoc(chatRoomRef, {
+                users: [userId, matchId],
+                createdAt: new Date(),
+                messages: []
+              });
+              console.log('Chat room created with ID:', chatRoomId);
+            } else {
+              console.log('Chat room already exists for IDs:', chatRoomId, 'or', reverseChatRoomId);
+            }
+          }
         } catch (error) {
-          console.error('Error updating matches:', error);
+          console.error('Error updating matches or creating chat rooms:', error);
         }
       }
     };
+
+
+    
 
 
     useEffect(() => {
@@ -93,7 +122,17 @@ const MatchScreen = ({navigation}) => {
       } catch (err) {
         setError(err);
         setLoading(false);
+        setModalMessage('You are offline; Reconnect to the internet ');
+            setModalVisible(true);
+            setTimeout(() => {
+              setModalVisible(false);
+            }, 3000);
       }
+    };
+
+    const closeModal = () => {
+      setModalVisible(false);
+      setModalMessage(""); // Optional: Reset the message when closing the modal
     };
   
     const fetchMoreUsers = async () => {
@@ -132,6 +171,44 @@ const MatchScreen = ({navigation}) => {
         setActiveIndex(index);
       }
     };
+
+    const confirmRemoveUser = (id) => {
+      Alert.alert(
+        'Remove User',
+        'Are you sure you want to remove this user?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => handleMatchesRemove(id),
+          },
+        ],
+        { cancelable: false }
+      );
+    };
+
+    const confirmWhoYouLikedRemove = (id) => {
+      Alert.alert(
+        'Remove User',
+        'Are you sure you want to remove this user?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => handleRemove(id),
+          },
+        ],
+        { cancelable: false }
+      );
+    };
   
     const handleRemove = async (id) => {
       try {
@@ -152,6 +229,26 @@ const MatchScreen = ({navigation}) => {
         console.error('Error removing user from "whoYouLiked":', error);
       }
     };
+
+    const confirmWhoLikedYouRemove = (id) => {
+      Alert.alert(
+        'Remove User',
+        'Are you sure you want to remove this user?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Pressed'),
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: () => handleWhoLikedYouRemove(id),
+          },
+        ],
+        { cancelable: false }
+      );
+    };
+  
 
     const handleWhoLikedYouRemove = async (id) => {
       try {
@@ -231,7 +328,7 @@ const MatchScreen = ({navigation}) => {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
         <View style={styles.actionContainer}>
-          <TouchableOpacity onPress={() => handleWhoLikedYouRemove(item.id)}>
+          <TouchableOpacity onPress={() => confirmWhoLikedYouRemove(item.id)}>
             <Icon name='close' type='font-awesome' color='#fff' size={30} />
           </TouchableOpacity>
           <TouchableOpacity>
@@ -248,7 +345,7 @@ const MatchScreen = ({navigation}) => {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
         <View style={styles.actionContainer}>
-          <TouchableOpacity onPress={() => handleRemove(item.id)}>
+          <TouchableOpacity onPress={() => confirmWhoYouLikedRemove(item.id)}>
             <Icon name='close' type='font-awesome' color='#fff' size={30} />
           </TouchableOpacity>
         </View>
@@ -262,7 +359,7 @@ const MatchScreen = ({navigation}) => {
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
         <View style={styles.actionContainer}>
-          <TouchableOpacity onPress={() => handleMatchesRemove(item.id)}>
+          <TouchableOpacity onPress={() => confirmRemoveUser(item.id)}>
             <Icon name='close' type='font-awesome' color='#fff' size={30} />
           </TouchableOpacity>
         </View>
@@ -291,7 +388,7 @@ const MatchScreen = ({navigation}) => {
               activeIndex === 0 ? styles.activeButton : null
             ]}
             onPress={() => {
-              setIsPopupVisible(false);
+              // setIsPopupVisible(false);
               handleActiveIndex(0);
             }}
           >
@@ -312,7 +409,7 @@ const MatchScreen = ({navigation}) => {
               activeIndex === 1 ? styles.activeButton : null
             ]}
             onPress={() => {
-              setIsPopupVisible(false);
+              // setIsPopupVisible(false);
               handleActiveIndex(1);
             }}
           >
@@ -333,7 +430,7 @@ const MatchScreen = ({navigation}) => {
               activeIndex === 2 ? styles.activeButton : null
             ]}
             onPress={() => {
-              setIsPopupVisible(false);
+              // setIsPopupVisible(false);
               handleActiveIndex(2);
             }}
           >
@@ -403,6 +500,20 @@ const MatchScreen = ({navigation}) => {
         messageIcon={messages}
         userIcon={user}
       />
+      <Modal  
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => {
+                closeModal();
+            }}
+          >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{modalMessage}</Text>
+            </View>
+          </View>
+        </Modal>
     </SafeAreaView>
   );
 };
@@ -507,5 +618,23 @@ const styles = StyleSheet.create({
       },
       activeButtonText: {
         color: '#fff'
+      },
+      modalView: {
+        backgroundColor: 'white',
+        padding: 20,
+        borderRadius: 8,
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      modalText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
       },
 })

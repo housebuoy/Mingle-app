@@ -256,14 +256,20 @@ const AccountProfileScreen = ({navigation}) => {
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
-            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Gender</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.gender}</Text>
+            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Username</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.username}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Email Adress</Text>
             <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.email}</Text>
+          </View>
+        </View>
+        <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
+          <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
+            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Gender</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.gender}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>

@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderColor: '#E94057',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
         paddingVertical: 2,
         gap: 45,
         position: 'fixed',

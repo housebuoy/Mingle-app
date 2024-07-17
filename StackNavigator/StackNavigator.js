@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Welcome from '../screens/Welcome';
 import { createStackNavigator } from '@react-navigation/stack';
 import Onboarding from '../screens/Onboarding';
@@ -55,6 +55,11 @@ export default function App({profilePicture}) {
           console.error('Error signing out:', error);
         }
       };
+
+    const [isModalVisible, setModalVisible] = useState(false);
+    const toggleModal = () => {
+        setModalVisible(!isModalVisible);
+    };
     
   return (
     <LikedUsersProvider>
@@ -199,7 +204,7 @@ export default function App({profilePicture}) {
                     </TouchableOpacity>),
                     headerRight: () => (
                         <View style={{ flexDirection: 'row', alignItems: 'space-between',}}>
-                          <TouchableOpacity style={{        
+                          <TouchableOpacity onPress={toggleModal} style={{        
                                 paddingVertical: 12,
                                 paddingHorizontal: 12,
                                 borderWidth: 1,

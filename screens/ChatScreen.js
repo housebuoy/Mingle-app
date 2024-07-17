@@ -3,7 +3,7 @@ import React, {useState, useRef, useEffect} from 'react'
 import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, Timestamp } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-// import NetInfo from '@react-native-community/netinfo';
+import { useLikedUsers } from '../hooks/likedUsersContext';
 import * as Clipboard from 'expo-clipboard';
 import { useRoute } from '@react-navigation/native';
 import { Icon } from '@rneui/themed';
@@ -15,9 +15,7 @@ const ChatScreen = () => {
     const db = getFirestore()
     const storage = getStorage()
 
-    const [messages, setMessages] = useState([   
-      ]);
-
+    const [messages, setMessages] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [newMessage, setNewMessage] = useState('');
@@ -30,6 +28,25 @@ const ChatScreen = () => {
     const flatListRef = useRef(null);
     const [isOnline, setIsOnline] = useState(true);
     const [lastMessages, setLastMessages] = useState([]);
+    const { isModalVisible, toggleModal } = useLikedUsers();
+    
+    const handleRemoveUser = () => {
+      // Implement user removal logic here
+      toggleModal();
+      console.log('Remove User');
+    };
+  
+    const handleReportUser = () => {
+      // Implement user report logic here
+      toggleModal();
+      console.log('Report User');
+    };
+  
+    const handleViewUserInfo = () => {
+      // Implement view user info logic here
+      toggleModal();
+      navigation.navigate('UserInfoScreen', { userId: 'userId' });
+    };
     
 
     useEffect(() => {
@@ -268,20 +285,7 @@ const ChatScreen = () => {
           </TouchableOpacity>
         );
       };
-    // const handleSend = () => {
-    //   const messageId = Math.random().toString(36).substr(2, 9);
-    //     if (newMessage.trim()) {
-    //       const newMsg = {
-    //         id: messageId,
-    //         text: newMessage,
-    //         sender: userToken,
-    //         receiver: userId,
-    //         timestamp: new Date()
-    //       };
-    //       setMessages([newMsg, ...messages]); // Add the new message at the start since the list is inverted
-    //       setNewMessage('');
-    //     }
-    //   };
+
       return (
         <>
         <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -330,6 +334,19 @@ const ChatScreen = () => {
                   </TouchableOpacity>
               </View>
           </Modal>
+          {/* <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
+        <View style={styles.modalContent}>
+          <TouchableOpacity onPress={handleRemoveUser}>
+            <Text style={styles.optionText}>Remove User</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleReportUser}>
+            <Text style={styles.optionText}>Report User</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleViewUserInfo}>
+            <Text style={styles.optionText}>View User's Info</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal> */}
         </>
       );
 
@@ -467,7 +484,7 @@ const styles = StyleSheet.create({
       color: '#fff'
   },
   myTimestamp: {
-      color: '#ddd',
+      color: '#ccc',
       fontFamily: 'Poppins-Medium',
       fontSize: 12,
       textAlign : 'right'
@@ -475,8 +492,27 @@ const styles = StyleSheet.create({
   userTimestamp: {
       color: '#e94057',
       fontFamily: 'Poppins-Medium',
-      fontSize: 10,
+      fontSize: 12,
       marginTop: 1,
       textAlign : 'right'
+  },
+  modal: {
+    justifyContent: 'flex-start',
+    margin: 0,
+  },
+  dropdownContent: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    position: 'absolute',
+    top: 60,
+    right: 10,
+    width: 200,
+  },
+  optionText: {
+    fontSize: 16,
+    marginVertical: 8,
   },
   });

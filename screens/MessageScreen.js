@@ -2,7 +2,7 @@ import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity, Modal, TextI
 import React, {useState, useEffect} from 'react'
 import BottomNavBar from '../components/BottomNavBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { getFirestore, doc, getDoc,  collection, query, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc,  collection, query, getDocs, setDoc, where, } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import TopNavBar from '../components/TopNavBar'
 import setting from '../assets/images/icons/setting-config.png';
@@ -14,7 +14,8 @@ import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
 import { data } from '../components/data'
 import { useUser } from '../context/UseContext';
-
+import * as ImagePicker from 'expo-image-picker';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 const MessageScreen = ({navigation}) => {
 
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
@@ -23,6 +24,7 @@ const MessageScreen = ({navigation}) => {
   const [matches, setMatches] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [lastMessages, setLastMessages] = useState({});
+  const [stories, setStories] = useState([]);
   const { userData } = useUser();
 
   const db = getFirestore();
@@ -138,7 +140,38 @@ const MessageScreen = ({navigation}) => {
     setFilteredData(matches.filter(item => item.username.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText, matches]);
 
-
+  // adding images to the gallery
+  const uploadImageAsync = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const filename = uri.split('/').pop();
+  
+    const imageRef = storage.ref(`images/${filename}`);
+    await imageRef.put(blob);
+    const downloadURL = await imageRef.getDownloadURL();
+  
+    // Add a document to firestore with image URL and timestamp
+    await firestore.collection('stories').add({
+      imageURL: downloadURL,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  
+    return downloadURL;
+  };
+  
+  const pickImageAndUpload = async () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+  
+    let result = await ImagePicker.launchImageLibrary(options);
+  
+    if (!result.cancelled) {
+      const uploadUrl = await uploadImageAsync(result.uri);
+      // Use the uploadUrl to display the image or share with other users
+    }
+  };
   
 
   const renderItem = ({ item }) => {
@@ -147,7 +180,9 @@ const MessageScreen = ({navigation}) => {
 
     return(
     <View style={styles.userContainer}>
-      <Image source={item.profileImageUrl? { uri: item.profileImageUrl }: user} style={styles.userImage} />
+      <TouchableOpacity onPress={() => navigation.navigate('UserMatchesInfo', { userId: item.id, userName: item.username })}>
+        <Image source={item.profileImageUrl? { uri: item.profileImageUrl }: user} style={styles.userImage} />
+      </TouchableOpacity>
       <TouchableOpacity style={styles.userInfo} onPress={() => navigation.navigate('Chat', { userId: item.id, userName: item.username, profilePicture: item.profileImageUrl })}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
           <Text style={styles.userName}>{item.username}</Text>
@@ -190,13 +225,13 @@ const MessageScreen = ({navigation}) => {
   );
 
   const renderActivity = ({ item }) => (
-    <View style={styles.activityContainer}>
+    <TouchableOpacity style={styles.activityContainer}>
         <>
             <Image source={{ uri: item.profileImageUrl }} style={styles.userImage} />
             <Text style={{fontFamily:'Poppins-Bold', fontSize: 12}}>{item.name.split(' ')[0]}</Text>
         </>
       
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -209,13 +244,15 @@ const MessageScreen = ({navigation}) => {
           <View style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#fff', }}>
             <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#000000' }}>Gallery</Text>
             <View style={{ flexDirection: 'row', gap: 10}}>
-              <View style={[{ alignItems: 'center', justifyContent: 'center',}]}>
-                  <View style={[{borderWidth: 1, borderColor: 'red',  borderRadius: 35, width: 55, height: 55, justifyContent: 'center',}]}>
-                    <Image source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
-                  </View>                
-                    <Text style={{fontFamily:'Poppins-Bold', fontSize: 12}}>You</Text>
-                
-              </View>        
+            <TouchableOpacity
+              style={{ alignItems: 'center', justifyContent: 'center' }}
+              // onPress={pickAndUploadImage}
+            >
+              <View style={{ borderWidth: 1, borderColor: 'red', borderRadius: 35, width: 55, height: 55, justifyContent: 'center' }}>
+                <Image source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
+              </View>
+              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 12 }}>You</Text>
+            </TouchableOpacity>   
               <View style={styles.activityContainer}>
                 <FlatList
                   data={matches}

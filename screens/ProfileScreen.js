@@ -97,8 +97,9 @@ const ProfileScreen = ({ navigation }) => {
       await updateDoc(userRef, {
         profileImageUrl: downloadURL,
       });
-  
+      console.log(downloadURL)
       console.log('Profile image uploaded and URL saved to Firestore');
+      await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
     } catch (error) {
       console.error('Error uploading profile image:', error);
       setModalMessage('Failed to upload profile image');
@@ -111,7 +112,7 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
   
-  const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, selectedImage, userInfo) => {
+  const saveProfileToFirestore = async (userId, firstName, lastName, occupation, date, profileImageUrl, userInfo) => {
     try {
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, {
@@ -119,9 +120,10 @@ const ProfileScreen = ({ navigation }) => {
         lastName: lastName,
         occupation: occupation,
         birthdate: date,
-        profileImageUrl: selectedImage, // Use the selected image URL from Firebase Storage
+        profileImageUrl: profileImageUrl, // Use the selected image URL from Firebase Storage
         userInfo: userInfo,
       });
+      console.log(profileImageUrl);
       console.log('User profile info updated successfully');
     } catch (error) {
       console.error('Error storing profile info:', error);
@@ -129,11 +131,11 @@ const ProfileScreen = ({ navigation }) => {
   };
 
 
-const handleProfileUpdate = async () => {
+const handleProfileUpdate = async (downloadURL) => {
   try {
     const userId = await AsyncStorage.getItem('userToken');
-    if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && selectedImage !== null && userInfo !== ''){
-        await saveProfileToFirestore(userId, firstName, lastName, occupation, date, selectedImage, userInfo);
+    if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && downloadURL !== null && userInfo !== ''){
+        // await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
             console.log('profile updated');
             navigation.navigate('Gender')
     }else{

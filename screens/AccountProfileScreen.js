@@ -277,10 +277,6 @@ const AccountProfileScreen = ({navigation}) => {
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Location</Text>
             <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.address.city}, {userData.address.country}</Text>
           </View>
-          <TouchableOpacity style={[styles.topRightNav, {flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]} >
-            <Icon name="location-pin" size={24} color="#E94057" />
-            <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 12}}>{data.distance}</Text>
-          </TouchableOpacity>
         </View>
         <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>

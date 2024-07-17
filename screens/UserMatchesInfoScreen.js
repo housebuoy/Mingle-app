@@ -24,6 +24,8 @@ const UserMatchesInfoScreen = ({navigation, route}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const { userId, userName } = route.params;
+  const [currentUserLocation, setCurrentUserLocation] = useState(null);
+  const [distance, setDistance] = useState(null);
   const [userData, setUserData] = useState(null);  // Initialize userData as null
   const [storedUserId, setStoredUserId] = useState(null);
   const [error, setError] = useState(null);
@@ -36,43 +38,86 @@ const UserMatchesInfoScreen = ({navigation, route}) => {
 const db = getFirestore();
 const auth = getAuth();
 
-  const data = 
-    {
-      distance: '1 km',
-    }
+const haversineDistance = (lat1, lon1, lat2, lon2) => {
+    const toRadians = (degrees) => degrees * (Math.PI / 180);
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-          try {
-            const userDoc = await getDoc(doc(db, 'users', userId));
-            if (userDoc.exists()) {
-              setUserData(userDoc.data());
-            } else {
-              console.log('No such document!');
+    const R = 6371; // Radius of the Earth in kilometers
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in kilometers
+
+    return distance;
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userId = route.params?.userId; // Get userId from route.params
+        if (userId) {
+          const db = getFirestore(); // Initialize Firestore
+          const userDoc = await getDoc(doc(db, 'users', userId));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            const birthdate = new Date(userData.birthdate.toDate());
+            const age = differenceInYears(new Date(), birthdate);
+            const gallery = userData.gallery || [];
+
+            const updatedUserData = {
+              ...userData,
+              age,
+              gallery,
+            };
+
+            setUserData(updatedUserData);
+
+            const currentUserData = await AsyncStorage.getItem('userdata');
+            if (currentUserData) {
+              const parsedUserData = JSON.parse(currentUserData);
+              const { latitude, longitude } = parsedUserData.location;
+
+              setCurrentUserLocation({ latitude, longitude });
+
+              const userLatitude = userData.location.latitude;
+              const userLongitude = userData.location.longitude;
+
+              const distance = haversineDistance(latitude, longitude, userLatitude, userLongitude);
+              setDistance(distance.toFixed(2));
             }
-          } catch (error) {
-            console.error('Error fetching user data:', error);
-          } finally {
-            setLoading(false);
+          } else {
+            console.error('No such document!');
           }
-        };
-    
-        fetchUserData();
-      }, [userId]);
-    
-      if (loading) {
-        return <ActivityIndicator size="large" color="#0000ff" />;
+        } else {
+          console.error('No user ID provided in route parameters');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
       }
-    
-      if (!userData) {
-        return (
-          <View style={styles.container}>
-            <Text>User data not found.</Text>
-          </View>
-        );
-      }
-    
-   
+    };
+
+    fetchUserData();
+  }, [route.params?.userId]);
+
+  if (loading) {
+    return (
+      <ActivityIndicator size="large" color="#e94057" style={{ flex: 1 }} />
+    );
+  }
+
+  if (!userData) {
+    return (
+      <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+        <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 24 }}>User data not found.</Text>
+      </View>
+    );
+  }
     
   
     if (loading) {
@@ -131,10 +176,10 @@ const auth = getAuth();
             <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 20 }}>Location</Text>
             <Text style={{ fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7 }}>{userData.address?.city}, {userData.address?.country}</Text>
           </View>
-          <TouchableOpacity style={[styles.topRightNav, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+          <View style={[styles.topRightNav, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
             <Icon name="location-pin" size={24} color="#E94057" />
-            <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 12 }}>{data.distance}</Text>
-          </TouchableOpacity>
+            <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 14 }}>{distance} km</Text>
+          </View>
         </View>
         <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10 }}>
           <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0 }}>

@@ -112,6 +112,7 @@ const DiscoverCard = () => {
             const formattedUsers = mapUserData(fetchedUsers);
             setUsers(formattedUsers);
           } catch (error) {
+            console.log(error)
             setError('Failed to fetch user data. Please check your network connection.');
           } finally {
             setLoading(false);

@@ -33,6 +33,7 @@ import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
 import UpdateGender from '../screens/UpdateGender.js';
+import UserMatchesInfoScreen from '../screens/UserMatchesInfoScreen.js';
 
 
 export default function App({profilePicture}) {
@@ -189,13 +190,13 @@ export default function App({profilePicture}) {
             options={({ route }) => ({
                 title: route.params.userName,
                 headerLeft: () => (
-                    <View style={{ flexDirection: 'row', alignItems: 'space-between',}}>
+                    <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'space-between',}} onPress={() => navigation.navigate('UserMatchesInfo', { userId: route.params?.userId, userName: route.params?.userName })}>
                       <Image
                         source={{uri: route.params.profilePicture} }
                         style={{ width: 50, height: 50, borderRadius: 30, marginLeft: 25 }}
                         resizeMode='cover'
                       />
-                    </View>),
+                    </TouchableOpacity>),
                     headerRight: () => (
                         <View style={{ flexDirection: 'row', alignItems: 'space-between',}}>
                           <TouchableOpacity style={{        
@@ -253,8 +254,44 @@ export default function App({profilePicture}) {
                     borderBottomWidth: 1,
                     borderColor: '#ccc'
                 },
-                    
             }} />
+            <Stack.Screen 
+                name="UserMatchesInfo" 
+                component={UserMatchesInfoScreen}
+                options={({ route }) => ({
+                    title: route.params?.userName,
+                    headerLeft: () => (
+                        <TouchableOpacity style={styles.topRightNav} onPress={handleGoBack}>
+                            <Icon name="chevron-left" type='entypto' size={30} color="#E94057" />
+                        </TouchableOpacity>
+                    ),  
+                    headerRight: () => (
+                        <TouchableOpacity 
+                        // onPress={() => {
+                        //   logout()
+                        //   // console.log(auth.currentUser.uid)
+                        // }}
+                        style={{        
+                              paddingVertical: 12,
+                              paddingHorizontal: 12,
+                              borderWidth: 1,
+                              borderColor: '#E8E6EA',
+                              borderRadius: 10, 
+                              marginRight: 15}} >
+                          <Icon name="options-vertical" type='simple-line-icon' size={20} color="#E94057" />
+                        </TouchableOpacity>
+                  ), 
+                    headerTitleStyle: {
+                        fontFamily: 'Poppins-Bold',
+                        fontSize: 20
+                      },
+                      headerStyle: {
+                        height: 100,
+                        borderBottomWidth: 1,
+                        borderColor: '#ccc'
+                      },                     
+                })}
+            />
       </Stack.Navigator>
       </LikedUsersProvider>
   );

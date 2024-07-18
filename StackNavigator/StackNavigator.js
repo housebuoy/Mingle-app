@@ -247,7 +247,7 @@ export default function App({profilePicture}) {
                             borderColor: '#E8E6EA',
                             borderRadius: 10, 
                             marginRight: 15}} >
-                        <Icon name="logout" size={30} color="#E94057" />
+                        <Icon name="logout" size={24} color="#E94057" />
                       </TouchableOpacity>
                 ),
                 headerTitleStyle: {

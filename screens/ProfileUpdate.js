@@ -136,7 +136,7 @@ const handleProfileUpdate = async (downloadURL) => {
     if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && downloadURL !== null && userInfo !== ''){
         // await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
             console.log('profile updated');
-            navigation.navigate('Gender')
+            navigation.navigate('Account')
     }else{
       setModalMessage('Please fill all fields including the profile image');
       setModalVisible(true);
@@ -150,7 +150,6 @@ const handleProfileUpdate = async (downloadURL) => {
     console.error(error);
   }
 };
-
 
   return (
     <SafeAreaView style={styles.container}>

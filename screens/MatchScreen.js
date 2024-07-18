@@ -323,7 +323,7 @@ const MatchScreen = ({navigation}) => {
     // }, [matches]);
 
   const renderWhoLikeYouItem = ({ item }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('UserMatchesInfo', { userId: item.id, userName: item.username })}>
       <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
@@ -340,7 +340,7 @@ const MatchScreen = ({navigation}) => {
   );
 
   const renderWhoYouLikeItem = ({ item }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('UserMatchesInfo', { userId: item.id, userName: item.username })}>
       <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>
@@ -354,7 +354,7 @@ const MatchScreen = ({navigation}) => {
   );
 
   const renderMatchItem = ({ item }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('UserMatchesInfo', { userId: item.id, userName: item.username })}>
       <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{item.name.split(' ')[0]}, {differenceInYears(new Date(), new Date(item.birthdate.toDate()))}</Text>

@@ -134,7 +134,7 @@ const AccountProfileScreen = ({navigation}) => {
           const storage = getStorage();
           const firestore = getFirestore();
   
-          const image = galleryImages[index];
+          const image = userData.gallery[index];
           const { storagePath, downloadURL } = image;
 
           
@@ -167,52 +167,7 @@ const AccountProfileScreen = ({navigation}) => {
         setIsLoading(false);
       }
     };
-    
-    
-    
-
-    // const fetchUserData = async () => {
-    //   try {
-    //   const userId = await AsyncStorage.getItem('userToken');
-    //   if (userId) {
-    //     const userRef = doc(db, 'users', userId);
-        
-    //       const docSnap = await getDoc(userRef);
-    //       if (docSnap.exists()) {
-    //         const userData = docSnap.data();
-    //         // getting the age from the user
-    //         const birthdate = new Date(userData.birthdate.toDate());
-    //         const age = differenceInYears(new Date(), birthdate);
-    //         const gallery = userData.gallery || [];
-    //         const userInfo = userData.userInfo
-    //         setUserData({
-    //           ...userData,
-    //           age,
-    //           gallery,
-    //         });
-    //         setGalleryImages(gallery);
-    //       } else {
-    //         console.error('No such document!');
-    //       }    
-    //     setLoading(false);
-    //   } else {
-    //     console.error('No user is signed in');
-    //     setLoading(false);
-    //   }} catch (error) {
-    //     setError(error);
-    //     console.error('Error fetching user data:', error);
-    //     setModalMessage('Error fetching user data:', error);
-    //     setModalVisible(true);
-    //     setTimeout(() => {
-    //       setModalVisible(false);
-    //     }, 3000);
-    //   }
-    // };
-  
-    // useEffect(() => {
-    //   fetchUserData();
-    // }, []);
-  
+     
   
     if (loading) {
       return (
@@ -315,25 +270,25 @@ const AccountProfileScreen = ({navigation}) => {
           <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Interests</Text>
           <View  style={{flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', flexWrap: 'wrap', gap: 5}}>            
               {userData.interests && userData.interests.map((interest, index) => (
-                <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]} >
+                <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]} onPress={()=> console.log(userData.gallery)}>
                   <Text key={index} style={styles.interestTabText}>{interest}</Text>
                 </TouchableOpacity>
               ))}
           </View>
         </View>
-
+              
         <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10 }}>
           <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 20 }}>Gallery</Text>
+          <TouchableOpacity
+            style={[styles.galleryTab1]}
+            onPress={pickGalleryImagesAsync}
+          >
+            <Icon name="add-photo-alternate" size={48} color="#E94057" />
+          </TouchableOpacity>
           <View>
-            <GalleryViewer images={galleryImages} onRemoveImage={removeImage} />
-            <TouchableOpacity
-              style={[styles.galleryTab1]}
-              onPress={pickGalleryImagesAsync}
-            >
-              <Icon name="add-photo-alternate" size={48} color="#E94057" />
-            </TouchableOpacity>
-          </View>
+            <GalleryViewer images={userData.gallery} onRemoveImage={removeImage} />
 
+          </View>
       {modalVisible && (
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -396,9 +351,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   galleryTab1:{
-    paddingHorizontal: 30,
-    width: '40%',
-    height: 200,
+    paddingHorizontal: 0,
+    width: '35%',
+    height: 80,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,

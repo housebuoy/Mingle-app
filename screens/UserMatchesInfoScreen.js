@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Modal, ActivityIndicator} from 'react-native'
+import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Modal, ActivityIndicator, FlatList} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useEffect, useState, useCallback } from 'react';
 import BottomNavBar from '../components/BottomNavBar'
@@ -67,6 +67,7 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
             const birthdate = new Date(userData.birthdate.toDate());
             const age = differenceInYears(new Date(), birthdate);
             const gallery = userData.gallery || [];
+            
 
             const updatedUserData = {
               ...userData,
@@ -126,13 +127,12 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
       );
     }
   
-
+    
 
     const closeModal = () => {
       setModalVisible(false);
       setModalMessage(""); // Optional: Reset the message when closing the modal
     };
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -202,11 +202,24 @@ const haversineDistance = (lat1, lon1, lat2, lon2) => {
           <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 20 }}>Interests</Text>
           <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', flexWrap: 'wrap', gap: 5 }}>
             {userData.interests && userData.interests.map((interest, index) => (
-              <TouchableOpacity key={index} style={[styles.interestTab, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+              <View key={index} style={[styles.interestTab, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]} >
                 <Text style={styles.interestTabText}>{interest}</Text>
-              </TouchableOpacity>
+              </View>
             ))}
           </View>
+        </View>
+        <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10 }}>
+          <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 20 }}>Gallery</Text>
+          {userData.gallery.length > 0? 
+          (<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalGalleryContainer}>
+            {userData.gallery.map((item, index) => (
+              <View key={index} style={styles.galleryItem}>
+                <Image source={{ uri: item.downloadURL }} style={styles.galleryImage} />
+              </View>
+            ))}
+          </ScrollView>)
+          : <Text style={styles.noGalleryText}>User has no image to showcase</Text>
+          }
         </View>
         <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10 }}>
           {modalVisible && (
@@ -259,6 +272,12 @@ const styles = StyleSheet.create({
     borderColor: '#E94057',
     borderRadius: 8,
   },
+  noGalleryText:{
+    color: '#ccc',
+    fontFamily: 'Poppins-Medium',
+    fontSize: 15,
+
+  },
   interestTabText:{
     color: '#E94057',
     fontFamily: 'Poppins-SemiBold',
@@ -283,12 +302,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  removeButton: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 5,
-    borderRadius: 50,
+  horizontalGalleryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  galleryContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  galleryItem: {
+    margin: 10,
+    width: 150,
+    height: 180,
+  },
+  galleryImage: {
+    width: 150,
+    height: 180,
+    borderRadius: 8,
   },
 })

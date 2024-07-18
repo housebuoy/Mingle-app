@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity, Modal, TextInput} from 'react-native'
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import BottomNavBar from '../components/BottomNavBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { getFirestore, doc, getDoc,  collection, query, getDocs, setDoc, where, } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc, collection, query, getDocs, setDoc, where, } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import TopNavBar from '../components/TopNavBar'
 import setting from '../assets/images/icons/setting-config.png';
@@ -15,7 +16,9 @@ import { Icon } from '@rneui/themed';
 import { data } from '../components/data'
 import { useUser } from '../context/UseContext';
 import * as ImagePicker from 'expo-image-picker';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { LinearProgress } from '@rneui/themed';
+
+
 const MessageScreen = ({navigation}) => {
 
   const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
@@ -26,6 +29,16 @@ const MessageScreen = ({navigation}) => {
   const [lastMessages, setLastMessages] = useState({});
   const [stories, setStories] = useState([]);
   const { userData } = useUser();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [activityImageUrl, setActivityImageUrl] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    fetchActivityImageUrl();
+  }, [userData]);
 
   const db = getFirestore();
 
@@ -140,37 +153,78 @@ const MessageScreen = ({navigation}) => {
     setFilteredData(matches.filter(item => item.username.toLowerCase().includes(searchText.toLowerCase())));
   }, [searchText, matches]);
 
-  // adding images to the gallery
-  const uploadImageAsync = async (uri) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const filename = uri.split('/').pop();
-  
-    const imageRef = storage.ref(`images/${filename}`);
-    await imageRef.put(blob);
-    const downloadURL = await imageRef.getDownloadURL();
-  
-    // Add a document to firestore with image URL and timestamp
-    await firestore.collection('stories').add({
-      imageURL: downloadURL,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-  
-    return downloadURL;
-  };
-  
-  const pickImageAndUpload = async () => {
-    const options = {
-      mediaType: 'photo',
-      quality: 1,
-    };
-  
-    let result = await ImagePicker.launchImageLibrary(options);
-  
-    if (!result.cancelled) {
-      const uploadUrl = await uploadImageAsync(result.uri);
-      // Use the uploadUrl to display the image or share with other users
+  const fetchActivityImageUrl = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userToken');
+      if (!userId) {
+        throw new Error('No user is signed in');
+      }
+
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', userId);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setActivityImageUrl(userData.activityImageUrl || null);
+      }
+    } catch (error) {
+      console.error('Error fetching activity image URL:', error);
     }
+  };
+
+  const pickAndUploadImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      quality: 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    });
+
+    if (!result.canceled) {
+      const imageUri = result.assets[0].uri;
+      await uploadImage(imageUri);
+    }
+  };
+
+  const uploadImage = async (imageUri) => {
+    setIsLoading(true);
+    try {
+      const userId = await AsyncStorage.getItem('userToken');
+      if (!userId) {
+        throw new Error('No user is signed in');
+      }
+
+      const storage = getStorage();
+      const storageRef = ref(storage, `users/${userId}/activityImage.jpg`);
+
+      // Convert the image to a blob
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+
+      // Upload the blob to Firebase Storage
+      const snapshot = await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      // Save the download URL to Firestore
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', userId);
+      await updateDoc(userRef, {
+        activityImageUrl: downloadURL,
+      });
+
+      setActivityImageUrl(downloadURL);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const openImageViewer = () => {
+    setModalVisible(true);
+    setTimeout(() => {
+      setModalVisible(false);
+    }, 6000); // Auto-close after 3 seconds
   };
   
 
@@ -227,7 +281,7 @@ const MessageScreen = ({navigation}) => {
   const renderActivity = ({ item }) => (
     <TouchableOpacity style={styles.activityContainer}>
         <>
-            <Image source={{ uri: item.profileImageUrl }} style={styles.userImage} />
+            <Image source={{ uri: item.profileImageUrl }} style={styles.userActivityImage} />
             <Text style={{fontFamily:'Poppins-Bold', fontSize: 12}}>{item.name.split(' ')[0]}</Text>
         </>
       
@@ -238,18 +292,25 @@ const MessageScreen = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       <TopNavBar title={'Messages'} iconSource={search} handlePress={toggleSearchModal} />
       {matches.length === 0 ? (
-        <Text style={{fontFamily:'Poppins-Regular', fontSize: 32, textAlign: 'center', color: '#ddd', marginHorizontal: 10 }}>Swipe and get swiped to start messaging</Text>
+        <Text style={{fontFamily:'Poppins-Regular', fontSize: 25, textAlign: 'center', color: '#ddd', marginHorizontal: 40 }}>Swipe and get swiped to start messaging</Text>
       ) :
         <View style={styles.container}>
           <View style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#fff', }}>
             <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#000000' }}>Gallery</Text>
             <View style={{ flexDirection: 'row', gap: 10}}>
-            <TouchableOpacity
+            <TouchableOpacity onPress={() => {
+                if (activityImageUrl) {
+                  openImageViewer();
+                } else {
+                  pickAndUploadImage();
+                }
+              }}
+              disabled={isLoading}
               style={{ alignItems: 'center', justifyContent: 'center' }}
               // onPress={pickAndUploadImage}
             >
-              <View style={{ borderWidth: 1, borderColor: 'red', borderRadius: 35, width: 55, height: 55, justifyContent: 'center' }}>
-                <Image source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
+              <View style={{ width: 55, height: 55, justifyContent: 'center' }}>
+                <Image source={activityImageUrl ? { uri: activityImageUrl } : userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userActivityImage} />
               </View>
               <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 12 }}>You</Text>
             </TouchableOpacity>   
@@ -310,6 +371,35 @@ const MessageScreen = ({navigation}) => {
             </View>)}
         </View>
       </Modal>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        
+
+          <View style={styles.modalContainer}>
+
+          <LinearProgress
+            style={styles.progressBar}
+            value={1}
+            duration={3000}
+            variant="determinate"
+          />
+          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 20 }}>
+            
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
+              <Image source={ userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
+              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20,color: '#fff' }}>You</Text>
+            </View>
+            <TouchableOpacity style={styles.topRightNav} onPress={() => setModalVisible(false)}>
+              <Icon name="close" type='antdesign' size={25} color="#e94057" />  
+            </TouchableOpacity>
+          </View>
+          <Image source={{ uri: activityImageUrl }} style={styles.fullImage} />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -333,6 +423,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         marginVertical: 4,
+        marginRight: 16,
       },
       userContainer: {
         flexDirection: 'row',
@@ -356,6 +447,12 @@ const styles = StyleSheet.create({
         borderRadius: 35,
         marginRight: 16,
       },
+      userActivityImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        // marginRight: 16,
+      },
       userInfo: {
         flex: 1,
 
@@ -370,7 +467,7 @@ const styles = StyleSheet.create({
         color: '#666',
       },
       userTime: {
-        fontSize: 15,
+        fontSize: 12,
         fontFamily: 'Poppins-Medium',
         color: '#979494',
       },
@@ -396,5 +493,28 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         fontSize: 18,
         fontFamily: 'Poppins-Medium',
+      },
+      modalContainer: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      fullImage: {
+        width: '90%',
+        height: '75%',
+        resizeMode: 'contain',
+      },
+      progressBar: {
+        width: '80%',
+        marginTop: 10,
+      },
+      topRightNav: {
+        paddingVertical: 5,
+        paddingHorizontal: 5,
+        borderWidth: 1,
+        borderColor: '#E8E6EA',
+        borderRadius: 10,
+        marginRight: 10
       },
 })

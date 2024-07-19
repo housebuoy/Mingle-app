@@ -20,20 +20,6 @@ const DiscoverCard = () => {
       const [error, setError] = useState(null);
       const swiperRef = useRef(null);
 
-      // const checkAndUpdateMatches = async (userId, whoYouLiked, whoLikedYou) => {
-      //   const matches = whoYouLiked.filter(id => whoLikedYou.includes(id));
-      //   if (matches.length > 0) {
-      //     try {
-      //       const userDocRef = doc(db, 'users', userId);
-      //       await updateDoc(userDocRef, { matches: arrayUnion(...matches) });
-      //       console.log('Matches updated:', matches);
-      //     } catch (error) {
-      //       console.error('Error updating matches:', error);
-      //     }
-      //   }
-      // };
-      
-
       const fetchUsers = async (currentUserId) => {
         try {
           const querySnapshot = await getDocs(collection(db, 'users'));
@@ -182,7 +168,7 @@ const DiscoverCard = () => {
           <View style={styles.card}>
             <Image source={user.image} style={styles.image} />
             <View style={styles.infoContainer}>
-              <Text style={styles.name}>{user.name}, {user.age}</Text>
+              <Text style={styles.name}>{user.name}, {user.age !== null ? user.age : ''}</Text>
               <Text style={styles.profession}>{user.profession}</Text>
               <View style={styles.distanceContainer}>
                 <Icon name="location-on" size={18} color="#aeadad" />

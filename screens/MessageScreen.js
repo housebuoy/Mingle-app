@@ -30,6 +30,7 @@ const MessageScreen = ({navigation}) => {
   const [stories, setStories] = useState([]);
   const { userData } = useUser();
   const [modalVisible, setModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [activityImageUrl, setActivityImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -201,7 +202,10 @@ const MessageScreen = ({navigation}) => {
           ...userData,
           userId: userDoc.id,
         });
-        setModalVisible(true);
+        setIsModalVisible(true);
+        setTimeout(() => {
+          setIsModalVisible(false);
+        }, 6000); // Auto-close after 3 seconds
       }
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -261,7 +265,7 @@ const MessageScreen = ({navigation}) => {
       setModalVisible(false);
     }, 6000); // Auto-close after 3 seconds
   };
-  
+
 
   const renderItem = ({ item }) => {
     const lastMessageText = getLastMessageText(item.lastMessage);
@@ -367,8 +371,13 @@ const MessageScreen = ({navigation}) => {
               style={{ alignItems: 'center', justifyContent: 'center' }}
               // onPress={pickAndUploadImage}
             >
-              <View style={{ width: 55, height: 55, justifyContent: 'center' }}>
+              <View style={{ width: 55, height: 55, justifyContent: 'center', position:"relative" }}>
                 <Image source={activityImageUrl ? { uri: activityImageUrl } : userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userActivityImage} />
+                {!activityImageUrl && (
+                  <View style={{ position:'absolute', bottom: 0, right: 0, backgroundColor: '#e94057', borderRadius: 65}}>
+                    <Icon name="plus" type="antdesign" size={18} color="#fff" />
+                  </View>
+                )}           
               </View>
               <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 12 }}>You</Text>
             </TouchableOpacity>   
@@ -444,14 +453,42 @@ const MessageScreen = ({navigation}) => {
           />
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 20 }}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
-              <Image source={ selectedUser?.profileImageUrl ? { uri: selectedUser.profileImageUrl } : user} style={styles.userImage} />
-              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#fff' }}>{selectedUser?.username || 'User'}</Text>
+              <Image source={ userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
+              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#fff' }}>You</Text>
             </View>
+            <TouchableOpacity style={styles.topRightNav} onPress={() => setModalVisible(false)}>
+              <Icon name="delete" size={25} color="#e94057" />  
+            </TouchableOpacity>
             <TouchableOpacity style={styles.topRightNav} onPress={() => setModalVisible(false)}>
               <Icon name="close" type='antdesign' size={25} color="#e94057" />  
             </TouchableOpacity>
           </View>
-          <Image source={{ uri: selectedUser?.activityImageUrl }} style={styles.fullImage} />
+          <Image source={{ uri:activityImageUrl }} style={styles.fullImage} />
+        </View>
+      </Modal>
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setIsModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <LinearProgress
+            style={styles.progressBar}
+            value={1}
+            duration={3000}
+            variant="determinate"
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 20 }}>
+            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
+              <Image source={ selectedUser?.profileImageUrl ? { uri: selectedUser.profileImageUrl } : user} style={styles.userImage} />
+              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#fff' }}>{selectedUser?.username || 'User'}</Text>
+            </View>
+            <TouchableOpacity style={styles.topRightNav} onPress={() => setIsModalVisible(false)}>
+              <Icon name="close" type='antdesign' size={25} color="#e94057" />  
+            </TouchableOpacity>
+          </View>
+          <Image source={{ uri:selectedUser?.activityImageUrl }} style={styles.fullImage} />
         </View>
       </Modal>
     </SafeAreaView>
@@ -487,11 +524,6 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         backgroundColor: '#fff',
         borderRadius: 8,
-        // shadowColor: '#000',
-        // shadowOffset: { width: 0, height: 2 },
-        // shadowOpacity: 0.1,
-        // shadowRadius: 4,
-        // elevation: 2,
         borderBottomColor: '#e4e4e4',
         borderBottomWidth: 0.3,
       },
@@ -556,7 +588,7 @@ const styles = StyleSheet.create({
       },
       fullImage: {
         width: '90%',
-        height: '75%',
+        height: '85%',
         resizeMode: 'contain',
       },
       progressBar: {

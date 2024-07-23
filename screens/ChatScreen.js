@@ -108,6 +108,15 @@ const ChatScreen = () => {
       return () => unsubscribe();
     };
 
+    const markMessageAsRead = async (chatRoomId, messageId) => {
+      const messageDocRef = doc(db, 'messages', chatRoomId);
+      await updateDoc(messageDocRef, {
+        messages: arrayUnion({
+          id: messageId,
+          read: true
+        })
+      });
+    };
   
 
 
@@ -194,12 +203,13 @@ const ChatScreen = () => {
           audioUri: downloadURL,
           sender: userToken,
           receiver: userId,
-          timestamp: Timestamp.now()
+          timestamp: Timestamp.now(),
+          read: false,
         };
         
-        await updateDoc(doc(db, 'messages', currentChatRoomId), {
-          messages: arrayUnion(newMsg)
-        });
+        // await updateDoc(doc(db, 'messages', currentChatRoomId), {
+        //   messages: arrayUnion(newMsg)
+        // });
         await updateDoc(doc(db, 'messages', currentChatRoomId), {
           messages: arrayUnion(newMsg),
           lastMessage: newMsg // Update last message field
@@ -249,7 +259,8 @@ const ChatScreen = () => {
               text: newMessage,
               sender: userToken,
               receiver: userId,
-              timestamp: Timestamp.now()
+              timestamp: Timestamp.now(),
+              read: false,
             };
     
             await updateDoc(doc(db, 'messages', currentChatRoomId), {
@@ -271,7 +282,8 @@ const ChatScreen = () => {
         const formattedTime = timestamp.toLocaleTimeString();
     
         return (
-          <TouchableOpacity style={item.sender === userToken ? styles.myMessageContainer : styles.userMessageContainer} onLongPress={() => handleLongPress(item)}>
+          <TouchableOpacity style={item.sender === userToken ? styles.myMessageContainer : styles.userMessageContainer} onLongPress={() => {handleLongPress(item)
+          }}>
             {item.text ? (
               <Text style={item.sender === userToken ? styles.myMessageText : styles.userMessageText}>{item.text}</Text>
             ) : (

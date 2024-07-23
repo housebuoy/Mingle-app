@@ -34,6 +34,7 @@ const MessageScreen = ({navigation}) => {
   const [activityImageUrl, setActivityImageUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedUser, setSelectedUser] = useState(null);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -74,6 +75,14 @@ const MessageScreen = ({navigation}) => {
       return null;
     }
   };
+  
+
+  const getLastMessageText = (message) => {
+    if (!message) return 'No messages yet';
+    if (message.audioUri) return 'Audio';
+    if (message.text) return message.text;
+    return 'No messages yet';
+  };
 
   useEffect(() => {
     const fetchLastMessages = async () => {
@@ -94,24 +103,26 @@ const MessageScreen = ({navigation}) => {
       fetchLastMessages();
     }
   }, [matches]);
-  
-  
+
+
 
   useEffect(() => {
-    const fetchMatches = async () => {
+    const fetchMatchesAndActivity = async () => {
       try {
         const userToken = await AsyncStorage.getItem('userToken');
         if (!userToken) throw new Error('No user is signed in');
   
-        const userDocRef = doc(db, 'users', userToken);
+        const firestore = getFirestore();
+        const userDocRef = doc(firestore, 'users', userToken);
         const userDocSnap = await getDoc(userDocRef);
   
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
           const matchesIds = userData.matches || [];
-  
+          
+          // Fetching matches data
           const matchesData = await Promise.all(matchesIds.map(async (matchId) => {
-            const matchDocRef = doc(db, 'users', matchId);
+            const matchDocRef = doc(firestore, 'users', matchId);
             const matchDocSnap = await getDoc(matchDocRef);
             if (matchDocSnap.exists()) {
               return { id: matchId, ...matchDocSnap.data() };
@@ -124,14 +135,19 @@ const MessageScreen = ({navigation}) => {
   
           // Store matches data in AsyncStorage
           await AsyncStorage.setItem('matchesData', JSON.stringify(filteredMatches));
+  
+          // Fetching activity image URL
+          const activityImageUrl = userData.activityImageUrl || null;
+          setActivityImageUrl(activityImageUrl);
         }
       } catch (error) {
-        console.error('Error fetching matches:', error);
+        console.error('Error fetching matches and activity image URL:', error);
       }
     };
   
-    fetchMatches();
+    fetchMatchesAndActivity();
   }, []);
+  
 
   useEffect(() => {
     const loadMatchesFromStorage = async () => {
@@ -170,6 +186,25 @@ const MessageScreen = ({navigation}) => {
       }
     } catch (error) {
       console.error('Error fetching activity image URL:', error);
+    }
+  };
+
+  const handlePressUser = async (userId) => {
+    try {
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', userId);
+      const userDoc = await getDoc(userRef);
+
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setSelectedUser({
+          ...userData,
+          userId: userDoc.id,
+        });
+        setModalVisible(true);
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
     }
   };
 
@@ -229,21 +264,35 @@ const MessageScreen = ({navigation}) => {
   
 
   const renderItem = ({ item }) => {
-    const lastMessageText = item.lastMessage ? item.lastMessage.text : 'No messages yet';
+    const lastMessageText = getLastMessageText(item.lastMessage);
     const lastMessageTime = item.lastMessage ? new Date(item.lastMessage.timestamp.seconds * 1000).toLocaleTimeString() : '';
 
     return(
     <View style={styles.userContainer}>
-      <TouchableOpacity onPress={() => navigation.navigate('UserMatchesInfo', { userId: item.id, userName: item.username })}>
+      <TouchableOpacity onPress={() => {
+        navigation.navigate('UserMatchesInfo', { userId: item.id, userName: item.username })
+        }
+        }>
         <Image source={item.profileImageUrl? { uri: item.profileImageUrl }: user} style={styles.userImage} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.userInfo} onPress={() => navigation.navigate('Chat', { userId: item.id, userName: item.username, profilePicture: item.profileImageUrl })}>
+      <TouchableOpacity style={styles.userInfo} 
+        onPress={() => 
+          {
+            navigation.navigate('Chat', { userId: item.id, userName: item.username, profilePicture: item.profileImageUrl })
+          }          
+          }>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
           <Text style={styles.userName}>{item.username}</Text>
           <Text style={styles.userTime}>{lastMessageTime}</Text>
         </View>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
-          <Text style={styles.userText}>{lastMessageText.length > 23 ? lastMessageText.slice(0, 23) + '...' : lastMessageText}</Text>
+          <Text style={styles.userText}>
+            {lastMessageText
+            ? lastMessageText.length > 23
+              ? lastMessageText.slice(0, 23) + '...'
+              : lastMessageText
+            : ''}
+          </Text>
           {/* {item.unread == undefined && (
             <View style={{
               alignItems: 'center',
@@ -278,15 +327,24 @@ const MessageScreen = ({navigation}) => {
     </View>
   );
 
-  const renderActivity = ({ item }) => (
-    <TouchableOpacity style={styles.activityContainer}>
+  const renderActivity = ({ item }) => {
+    // if (!item.activityImageUrl) {
+    //   return null;
+    // }
+
+    return(
+      <TouchableOpacity 
+        style={styles.activityContainer} 
+        onPress={() => handlePressUser(item.userId)}
+      >
         <>
-            <Image source={{ uri: item.profileImageUrl }} style={styles.userActivityImage} />
-            <Text style={{fontFamily:'Poppins-Bold', fontSize: 12}}>{item.name.split(' ')[0]}</Text>
-        </>
-      
-    </TouchableOpacity>
-  );
+          <Image source={{ uri: item.profileImageUrl }} style={styles.userActivityImage} />
+          <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 12 }}>{item.username}</Text>
+        </>      
+      </TouchableOpacity>
+    );
+  };
+  
 
   return (
     <SafeAreaView style={styles.container}>
@@ -296,7 +354,7 @@ const MessageScreen = ({navigation}) => {
       ) :
         <View style={styles.container}>
           <View style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: '#fff', }}>
-            <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#000000' }}>Gallery</Text>
+            <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#000000' }}>Activity</Text>
             <View style={{ flexDirection: 'row', gap: 10}}>
             <TouchableOpacity onPress={() => {
                 if (activityImageUrl) {
@@ -377,27 +435,23 @@ const MessageScreen = ({navigation}) => {
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        
-
-          <View style={styles.modalContainer}>
-
+        <View style={styles.modalContainer}>
           <LinearProgress
             style={styles.progressBar}
             value={1}
             duration={3000}
             variant="determinate"
           />
-          <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 20 }}>
-            
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 20 }}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
-              <Image source={ userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
-              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20,color: '#fff' }}>You</Text>
+              <Image source={ selectedUser?.profileImageUrl ? { uri: selectedUser.profileImageUrl } : user} style={styles.userImage} />
+              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#fff' }}>{selectedUser?.username || 'User'}</Text>
             </View>
             <TouchableOpacity style={styles.topRightNav} onPress={() => setModalVisible(false)}>
               <Icon name="close" type='antdesign' size={25} color="#e94057" />  
             </TouchableOpacity>
           </View>
-          <Image source={{ uri: activityImageUrl }} style={styles.fullImage} />
+          <Image source={{ uri: selectedUser?.activityImageUrl }} style={styles.fullImage} />
         </View>
       </Modal>
     </SafeAreaView>

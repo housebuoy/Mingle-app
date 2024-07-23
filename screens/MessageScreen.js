@@ -328,9 +328,9 @@ const MessageScreen = ({navigation}) => {
   );
 
   const renderActivity = ({ item }) => {
-    // if (!item.activityImageUrl) {
-    //   return null;
-    // }
+    if (!item.activityImageUrl) {
+      return null;
+    }
 
     return(
       <TouchableOpacity 

@@ -7,6 +7,13 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 const db = getFirestore();
 const auth = getAuth();
 
+const data = [
+  { label: 'Non-binary', value: '1' },
+  { label: 'Transgender', value: '2' },
+  { label: 'Cisgender', value: '3' },
+  { label: 'Gender fluid', value: '4' },
+];
+
 const GenderScreen = ({ navigation }) => {
   const [selectedGender, setSelectedGender] = useState('');
   const [error, setError] = useState('');
@@ -105,7 +112,7 @@ const GenderScreen = ({ navigation }) => {
           ]}
         >Man</Text>
       </TouchableOpacity>
-      <DropDown onGenderSelect={handleGenderSelect}/>
+      <DropDown onGenderSelect={handleGenderSelect} data={data}/>
       <TouchableOpacity style={styles.gendercontinueButton} onPress={() => handleGenderStore()}>
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>

@@ -3,15 +3,14 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-const data = [
-  { label: 'Non-binary', value: '1' },
-  { label: 'Transgender', value: '2' },
-  { label: 'Cisgender', value: '3' },
-  { label: 'Gender fluid', value: '4' },
+// const data = [
+//   { label: 'Non-binary', value: '1' },
+//   { label: 'Transgender', value: '2' },
+//   { label: 'Cisgender', value: '3' },
+//   { label: 'Gender fluid', value: '4' },
+// ];
 
-];
-
-const DropdownComponent = ({onGenderSelect}) => {
+const DropdownComponent = ({onGenderSelect, data}) => {
   const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
 
@@ -51,7 +50,7 @@ const DropdownComponent = ({onGenderSelect}) => {
         maxHeight={300}
         labelField="label"
         valueField="value"
-        placeholder={!isFocus ? 'Choose another' : ''}
+        placeholder={!isFocus ? 'Choose one' : ''}
         value={value}
         onFocus={() => setIsFocus(true)}
         onBlur={() => setIsFocus(false)}
@@ -75,7 +74,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: '#ffffff',
     padding: 16,
-    width: '90%',
+    width: '100%',
   },
   dropdown: {
     height: 50,

@@ -34,6 +34,8 @@ import 'firebase/auth';
 import 'firebase/firestore';
 import UpdateGender from '../screens/UpdateGender.js';
 import UserMatchesInfoScreen from '../screens/UserMatchesInfoScreen.js';
+import DeleteAccount from '../screens/DeleteAccount.js';
+import ReportUser from '../screens/ReportUser.js';
 
 
 export default function App({profilePicture}) {
@@ -186,6 +188,18 @@ export default function App({profilePicture}) {
             <Stack.Screen 
             name="Messages" 
             component={MessageScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="DeleteAccount" 
+            component={DeleteAccount}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="ReportUser" 
+            component={ReportUser}
             options={{
                 headerShown: false,
             }} />

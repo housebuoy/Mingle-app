@@ -65,7 +65,9 @@ const Login = ({ navigation }) => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const userId = userCredential.user.uid;
+      const user = userCredential.user
       await AsyncStorage.setItem('userToken', userId);
+      console.log(user)
 
       // Fetch user data
       const userRef = doc(getFirestore(), 'users', userId);
@@ -168,7 +170,7 @@ const Login = ({ navigation }) => {
               />
             </View>
           </View>
-          <TouchableOpacity  style={{marginRight: -150, marginVertical: 10,}} onPress={()=>navigation.navigate('ForgotPassword') }>
+          <TouchableOpacity  style={{marginRight: -150, marginVertical: 10,}}  onPress={() => navigation.navigate('ForgotPassword', { screenName: 'Login' })}>
                 <Text style={{textAlign: 'right', fontFamily: 'Poppins-Bold'}}>
                     Forgot Password?
                 </Text>

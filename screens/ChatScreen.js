@@ -288,8 +288,8 @@ const ChatScreen = () => {
               <Text style={item.sender === userToken ? styles.myMessageText : styles.userMessageText}>{item.text}</Text>
             ) : (
               <TouchableOpacity onPress={() => playAudio(item.audioUri, item.id)} style={styles.voiceNoteContainer}>
-                <Icon name="mic" size={20} color="#fff" />
-                <Text style={styles.audioMessageText}>Voice Note</Text>
+                <Icon name="mic" size={20} color={item.sender === userToken ? "#fff" : '#e94057'} />
+                <Text style={item.sender === userToken ? styles.audioMessageText : styles.userMessageText}>Voice Note</Text>
                 {playingMessageId === item.id ? <ActivityIndicator color="#fff" /> : null}
               </TouchableOpacity>
             )}
@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
       fontFamily: 'Poppins-Medium',
     },
     userMessageText: {
-      color: '#000',
+      color: '#e94057',
       fontSize: 16,
       fontFamily: 'Poppins-Medium',
     },
@@ -416,8 +416,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         // backgroundColor: '#0084ff',
-        paddingHorizontal: 12,
-        paddingVertical: 8,
+        paddingHorizontal: 2,
+        paddingVertical: 0,
         borderRadius: 20,
         marginVertical: 5,
         maxWidth: '75%',
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
       textAlign : 'right'
   },
   userTimestamp: {
-      color: '#e94057',
+      color: '#696666dd',
       fontFamily: 'Poppins-Medium',
       fontSize: 12,
       marginTop: 1,

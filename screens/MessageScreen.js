@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity, Modal, TextInput} from 'react-native'
+import { StyleSheet, Text, View, Image, FlatList, TouchableOpacity, Modal, TextInput, Alert} from 'react-native'
 import React, {useState, useEffect, useRef} from 'react'
 import BottomNavBar from '../components/BottomNavBar'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { getFirestore, doc, getDoc, updateDoc, collection, query, getDocs, setDoc, where, } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc, collection, query, getDocs, setDoc, where, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import TopNavBar from '../components/TopNavBar'
@@ -17,6 +17,7 @@ import { data } from '../components/data'
 import { useUser } from '../context/UseContext';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearProgress } from '@rneui/themed';
+
 
 
 const MessageScreen = ({navigation}) => {
@@ -36,6 +37,8 @@ const MessageScreen = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
+  const [activityImageTimestamp, setActivityImageTimestamp] = useState(null);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -232,31 +235,86 @@ const MessageScreen = ({navigation}) => {
       if (!userId) {
         throw new Error('No user is signed in');
       }
-
+  
       const storage = getStorage();
       const storageRef = ref(storage, `users/${userId}/activityImage.jpg`);
-
+  
       // Convert the image to a blob
       const response = await fetch(imageUri);
       const blob = await response.blob();
-
+  
       // Upload the blob to Firebase Storage
       const snapshot = await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(snapshot.ref);
-
-      // Save the download URL to Firestore
+  
+      // Save the download URL and timestamp to Firestore
       const firestore = getFirestore();
       const userRef = doc(firestore, 'users', userId);
       await updateDoc(userRef, {
         activityImageUrl: downloadURL,
+        activityImageTimestamp: Timestamp.now(),
       });
-
+  
       setActivityImageUrl(downloadURL);
+      setActivityImageTimestamp(Timestamp.now().toDate());
     } catch (error) {
       console.error('Error uploading image:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const showDeleteConfirmation = () => {
+    setConfirmDeleteVisible(true);
+  };
+
+  const deleteImage = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('userToken');
+      if (!userId) {
+        throw new Error('No user is signed in');
+      }
+  
+      // Delete the image from Firebase Storage
+      const storage = getStorage();
+      const storageRef = ref(storage, `users/${userId}/activityImage.jpg`);
+      await deleteObject(storageRef);
+  
+      // Delete the document from Firestore
+      const firestore = getFirestore();
+      const userRef = doc(firestore, 'users', userId);
+      await updateDoc(userRef, {
+        activityImageUrl: null,
+        activityImageTimestamp: null,
+      });
+  
+      // Reset the state
+      setActivityImageUrl(null);
+      setActivityImageTimestamp(null);
+      setModalVisible(false);
+    } catch (error) {
+      console.error('Error deleting image:', error);
+    }
+  };
+  
+  const confirmDelete = () => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete the image?',
+      [
+        {
+          text: 'Cancel',
+          onPress: () => setConfirmDeleteVisible(false),
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          onPress: deleteImage,
+          style: 'destructive',
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const openImageViewer = () => {
@@ -454,11 +512,28 @@ const MessageScreen = ({navigation}) => {
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 15, marginTop: 20 }}>
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
               <Image source={ userData.profileImageUrl ? { uri: userData.profileImageUrl } : user} style={styles.userImage} />
-              <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#fff' }}>You</Text>
+              <View>
+                <Text style={{ fontFamily: 'Poppins-Bold', fontSize: 20, color: '#fff' }}>You</Text>
+                {activityImageTimestamp && (
+            <Text>
+              Uploaded at {activityImageTimestamp.toLocaleTimeString()}
+            </Text>
+          )}
+              </View>
             </View>
-            <TouchableOpacity style={styles.topRightNav} onPress={() => setModalVisible(false)}>
-              <Icon name="delete" size={25} color="#e94057" />  
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity style={styles.topRightNav} onPress={showDeleteConfirmation}>
+                <Icon name="delete" size={25} color="#e94057" />
+              </TouchableOpacity>
+
+              {confirmDeleteVisible && (
+                <Modal visible={confirmDeleteVisible} transparent>
+                  <View style={styles.confirmDeleteContainer}>
+                    {confirmDelete()}
+                  </View>
+                </Modal>
+              )}
+            </View>
             <TouchableOpacity style={styles.topRightNav} onPress={() => setModalVisible(false)}>
               <Icon name="close" type='antdesign' size={25} color="#e94057" />  
             </TouchableOpacity>

@@ -7,6 +7,13 @@ import { getFirestore, doc, updateDoc } from 'firebase/firestore';
 const db = getFirestore();
 const auth = getAuth();
 
+const data = [
+  { label: 'Non-binary', value: '1' },
+  { label: 'Transgender', value: '2' },
+  { label: 'Cisgender', value: '3' },
+  { label: 'Gender fluid', value: '4' },
+];
+
 const UpdateGender = ({ navigation }) => {
   const [selectedGender, setSelectedGender] = useState('');
   const [error, setError] = useState('');
@@ -21,6 +28,7 @@ const UpdateGender = ({ navigation }) => {
   };
 
   const saveGenderToFirestore = async (userId, selectedGender) => {
+    
     try {
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, {
@@ -32,9 +40,10 @@ const UpdateGender = ({ navigation }) => {
       console.error('Error storing gender:', error);
     }
   };
-  const userId = auth.currentUser.uid;
+  
 
   const handleGenderStore = async () => {
+    const userId = auth.currentUser.uid;
     console.log(userId)
     try {
       setLoading(true);
@@ -105,7 +114,7 @@ const UpdateGender = ({ navigation }) => {
           ]}
         >Man</Text>
       </TouchableOpacity>
-      <DropDown onGenderSelect={handleGenderSelect}/>
+      <DropDown onGenderSelect={handleGenderSelect} data={data}/>
       <TouchableOpacity style={styles.gendercontinueButton} onPress={() => handleGenderStore()}>
         <Text style={styles.continueButtonText}>Continue</Text>
       </TouchableOpacity>
@@ -155,7 +164,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold'
   },
   option: {
-    width: '80%',
+    width: '90%',
     borderWidth: 1,
     borderColor: '#ddd',
     marginVertical: 10,
@@ -179,7 +188,7 @@ const styles = StyleSheet.create({
     color: 'white'
   },
   gendercontinueButton: {
-    width: '80%',
+    width: '90%',
     borderWidth: 1,
     borderColor: '#ddd',
     marginVertical: 10,

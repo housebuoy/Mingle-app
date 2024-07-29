@@ -1,18 +1,48 @@
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image,  Modal, Alert, } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TextInput, TouchableOpacity, Image,  Modal, Pressable, SafeAreaView, Linking } from 'react-native';
 import React, {useState, useRef} from 'react'
-import {getAuth, signInWithEmailAndPassword, sendPasswordResetEmail} from 'firebase/auth'
+import {getAuth} from 'firebase/auth'
+import DropDown from '../components/DropDown';
 
+const data = [
+    { label: 'None', value: '1' },
+    { label: 'Harassment', value: '2' },
+    { label: 'Infringement', value: '3' },
+    { label: 'Spam', value: '4' },
+    { label: 'Privacy violations', value: '5' },
+    { label: 'Violence/Threats', value: '6' },
+    { label: 'Other', value: '7' },
+  ];
 
-
-const ForgotPasswordScreen = ({navigation, route}) => {
-    const { screenName } = route.params;
+const ReportUser = ({navigation}) => {
     const auth = getAuth();
     const [email, setEmail] = useState('');
+    const [reportInfo, setReportInfo] = useState('');
+    const [selectedReason, setselectedReason] = useState('');
     const [validateMessage, setValidateMessage] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [emailError, setEmailError] = useState('');
     const isFocused = useRef(false);
+
+    const handleGenderSelect = (selectedReason) => {
+        setselectedReason(selectedReason);
+        console.log('Selected reason:', selectedReason);
+    };
+
+    const sendEmail = (email, subject, body) => {
+        const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        Linking.openURL(url)
+          .then((supported) => {
+            if (!supported) {
+              console.log('Email not supported');
+            } else {
+              return Linking.openURL(url);
+            }
+          })
+          .catch((err) => console.error('An error occurred', err));
+      };
+      
+
     const validateEmail = (email) => {
         const regex = /\S+@\S+\.\S+/;
         if (!regex.test(email)) {
@@ -28,14 +58,16 @@ const ForgotPasswordScreen = ({navigation, route}) => {
         return email!== '' ;
       };
 
-      const passwordReset= () =>{
-        if (validateForm()) {
-        sendPasswordResetEmail(auth, email )
-        setModalMessage("Check your email to reset your password");
+      const reportUser= () =>{
+        if (validateForm() && (selectedReason !== '' || reportInfo !== '')) {
+            const subject = 'User Report';
+            const body = `User email: ${email}\nReason: ${selectedReason}\nAdditional Info: ${reportInfo}`;
+            sendEmail('datingappmingle@gmail.com', subject, body);
+        setModalMessage("Our team will look into your report in no time");
         setModalVisible(true);
         setTimeout(() => {
             setModalVisible(false);
-            navigation.navigate(screenName)
+            navigation.navigate('Account')
           }, 3000);
         }else {
             setModalMessage("Please fill all required fields!");
@@ -53,10 +85,16 @@ const ForgotPasswordScreen = ({navigation, route}) => {
       
   return (
     <SafeAreaView style={styles.container}>
+        <Pressable style={{alignSelf: 'flex-start', }} onPress={() => navigation.goBack()}>
+          <Text style={{fontFamily: 'Poppins-Bold', fontSize: 40, color: "#E94057", lineHeight: 50, marginTop: -10, marginLeft: 10 }}>
+            {'<'}
+          </Text>
+      </Pressable>
+    <ScrollView style={styles.container}>
       <View style={styles.centeredContainer}>
         <Text style={{marginTop: 10, color: 'red'}}>{validateMessage}</Text>
-        <Text style={styles.signInTitle}>Reset Password</Text>
-        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 22, color: "#8D8B8B", lineHeight: 25, textAlign: 'center', marginBottom: 20}}>Enter your email address to reset your password</Text>
+        <Text style={styles.signInTitle}>Report User</Text>
+        <Text style={{fontFamily: 'Poppins-Medium', fontSize: 22, color: "#8D8B8B", lineHeight: 25, textAlign: 'center', marginBottom: 20}}>Help us get rid of those who violate our community guidelines.</Text>
         <View style={{alignItems: 'center', justifyContent: 'center', width: '100%', gap: 10, marginTop: 10, }}>
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>
@@ -65,7 +103,7 @@ const ForgotPasswordScreen = ({navigation, route}) => {
             <TextInput
               style={[styles.input,!email? styles.requiredField : {}]}
               onBlur={() => (isFocused.current = false)}
-              placeholder="Enter Email address"
+              placeholder="Enter User's Email address"
               value={email}
               onChangeText={(text) => {
                 setEmail(text);
@@ -75,9 +113,27 @@ const ForgotPasswordScreen = ({navigation, route}) => {
           
           {emailError && <Text style={{color: 'red'}}>{emailError}</Text>}
           </View>
-        <TouchableOpacity onPress={passwordReset} style={styles.button}>
+          <View style={styles.optionContainer}>
+            <Text style={[styles.inputLabel, {textAlign: 'left'}]}>
+                What are your reasons?
+            </Text>
+          </View>
+          <DropDown onGenderSelect={handleGenderSelect} data={data}/>
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>
+              Other reasons
+            </Text>
+            <TextInput
+                style={styles.infoInput}
+                placeholder="Tell us more"
+                value={reportInfo}
+                multiline
+                onChangeText={setReportInfo}
+            />
+          </View>
+        <TouchableOpacity onPress={reportUser} style={styles.button}>
             <Text style={styles.buttonText}>
-                Reset Password
+                Continue
             </Text>
         </TouchableOpacity>
         
@@ -97,17 +153,18 @@ const ForgotPasswordScreen = ({navigation, route}) => {
           </View>
         </Modal>
       </View >
+    </ScrollView>
     </SafeAreaView>
   )
 }
 
-export default ForgotPasswordScreen
+export default ReportUser
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
-        paddingTop: 100,
+        paddingTop: 10,
         paddingBottom: 50,
         paddingHorizontal: 5,
       },
@@ -125,14 +182,14 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 10,
       },
-      inputButton: {
-        backgroundColor: '#E94057',
-        paddingVertical: 15,
-        paddingHorizontal: 40,
-        borderRadius: 25,
-        alignItems: 'center',
-        width: '100%',
-      },
+    //   inputButton: {
+    //     backgroundColor: '#E94057',
+    //     paddingVertical: 15,
+    //     paddingHorizontal: 40,
+    //     borderRadius: 25,
+    //     alignItems: 'center',
+    //     width: '100%',
+    //   },
       signInTitle: {
         fontSize: 44,
         fontFamily: 'Poppins-Bold',
@@ -152,9 +209,21 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        width: '100%',
+        width: '90%',
         paddingHorizontal:  13,
         paddingVertical : 3,
+      },
+      optionContainer:{
+        fontSize: 20,
+        fontFamily: 'Poppins-Medium',
+        color: '#000',
+        backgroundColor: '#fff',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        width: '90%',
+        paddingHorizontal:  13,
+        marginBottom: -15
       },
       inputLabel: {
         fontSize: 20,
@@ -169,7 +238,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
       },
       input: {
-        fontSize: 22,
+        fontSize: 20,
         fontFamily: 'Poppins-Medium',
         color: '#878686',
         width: '100%',
@@ -200,5 +269,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         textAlign: 'center',
+      },
+      infoInput: {
+        width: '100%',
+        fontSize: 20,
+        marginBottom: 20,
+        fontFamily: 'Poppins-Medium'
       },
 })

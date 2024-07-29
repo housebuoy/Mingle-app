@@ -275,9 +275,8 @@ const AccountProfileScreen = ({navigation}) => {
                 </TouchableOpacity>
               ))}
           </View>
-        </View>
-              
-        <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10 }}>
+        </View>   
+        <View style={{ flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10, marginBottom: 20 }}>
           <Text style={{ fontFamily: 'Poppins-SemiBold', fontSize: 20 }}>Gallery</Text>
           <TouchableOpacity
             style={[styles.galleryTab1]}
@@ -285,10 +284,9 @@ const AccountProfileScreen = ({navigation}) => {
           >
             <Icon name="add-photo-alternate" size={48} color="#E94057" />
           </TouchableOpacity>
-          <View>
+          <ScrollView>
             <GalleryViewer images={userData.gallery} onRemoveImage={removeImage} />
-
-          </View>
+          </ScrollView>
       {modalVisible && (
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -296,7 +294,23 @@ const AccountProfileScreen = ({navigation}) => {
           </View>
         </View>
       )}
-    </View>
+    </View>  
+      <View >
+        <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20, color: '#000'}}>Account Management Actions</Text>
+          <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: 150}]} onPress={() => navigation.navigate('ReportUser')}>
+            <Icon name="user-tag" type='font-awesome-5' size={22} color="#E94057" />
+            <Text style={styles.interestTabText}>Report User</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: 180, marginTop: 5}]} onPress={() => navigation.navigate('DeleteAccount', { screenName: 'Account' })}>
+            <Icon name="user-slash" type='font-awesome-5' size={22} color="#E94057" />
+            <Text style={styles.interestTabText}>Delete Account</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: 180, marginTop: 5}]} onPress={() => navigation.navigate('ForgotPassword', { screenName: 'Account' })}>
+            <Icon name="form-textbox-password" type='material-community' size={24} color="#E94057" />
+            <Text style={styles.interestTabText}>Reset Password</Text>
+          </TouchableOpacity>
+      </View>
+           
         
       </ScrollView>
       <BottomNavBar navigation={navigation} 
@@ -331,6 +345,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     backgroundColor: '#fff',
+
   },
   topRightNav: {
     paddingVertical: 8,
@@ -342,6 +357,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingTop: 0,
     paddingHorizontal: 30,
+    marginBottom: 10
   },
   interestTab:{
     paddingVertical: 8,

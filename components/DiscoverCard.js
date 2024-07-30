@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect, } from 'react'
 import Swiper from 'react-native-deck-swiper';
 import { Icon } from 'react-native-elements';
 import { useLikedUsers } from '../hooks/likedUsersContext';
+import { useUser } from '../context/UseContext';
 import { collection, getDocs, getFirestore,  doc, setDoc, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,19 +15,26 @@ const DiscoverCard = () => {
       const auth = getAuth();
       const [users, setUsers] = useState([]);
       const [whoYouLiked, setWhoYouLiked] = useState([]);
-      const { likedUsers, setLikedUsers } = useLikedUsers();
+      const { likedUsers } = useLikedUsers();
       const [loading, setLoading] = useState(true);
+      const { userData} = useUser();
       const [lastVisible, setLastVisible] = useState(null);
       const [error, setError] = useState(null);
       const swiperRef = useRef(null);
 
-      const haversineDistance = (coords1, coords2) => {
+      const currentUserLocation = userData?.location
+
+      const haversineDistance = (user, currentUserLocation) => {
+        if (!currentUserLocation || !currentUserLocation?.latitude || !currentUserLocation?.longitude || !user.location) {
+          return 'N/A'; // or handle the error appropriately
+        }
+      
         const toRad = (x) => x * Math.PI / 180;
       
-        const lat1 = coords1.latitude;
-        const lon1 = coords1.longitude;
-        const lat2 = coords2.latitude;
-        const lon2 = coords2.longitude;
+        const lat1 = currentUserLocation.latitude;
+        const lon1 = currentUserLocation.longitude;
+        const lat2 = user?.location.latitude
+        const lon2 = user?.location.longitude
       
         const R = 6371; // Radius of the Earth in kilometers
         const dLat = toRad(lat2 - lat1);
@@ -37,8 +45,10 @@ const DiscoverCard = () => {
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distance = R * c; // Distance in kilometers
       
-        return distance;
+        return distance.toFixed(2); // Round to two decimal places
       };
+      
+
       
 
       const fetchUsers = async (currentUserId) => {
@@ -59,6 +69,8 @@ const DiscoverCard = () => {
       
 
       useEffect(() => {
+        console.log(currentUserLocation?.latitude)
+        // console.log(user?.location.latitude)
         const fetchWhoYouLiked = async () => {
           try {
             const currentUserId = await AsyncStorage.getItem('userToken');
@@ -83,7 +95,9 @@ const DiscoverCard = () => {
           name: `${user.firstName} ${user.lastName}`,
           age: new Date().getFullYear() - new Date(user.birthdate.toDate()).getFullYear(),
           profession: user.occupation,
-          distance: '1 km', // You might want to calculate or fetch the actual distance
+          gender: user.gender,
+          location: user.location,
+          distance: `${haversineDistance(user, currentUserLocation)} km`, // You might want to calculate or fetch the actual distance
           image: { uri: user.profileImageUrl }, // Assuming profileImageUrl is the URL of the image
         }));
       };
@@ -100,6 +114,7 @@ const DiscoverCard = () => {
             const formattedUsers = mapUserData(fetchedUsers);
             setUsers(formattedUsers);
           } catch (error) {
+            console.log(error)
             setError('Failed to fetch user data. Please check your network connection.');
           } finally {
             setLoading(false);
@@ -183,7 +198,7 @@ const DiscoverCard = () => {
       };
     
       const renderCard = (user) => {
-        if (!user || !user.image || !user.name || !user.age || !user.profession || !user.distance) {
+        if (!user || !user.image || !user.name || !user.age || !user.profession || !user.distance || !user.gender) {
           return null;
         }
         return (
@@ -191,7 +206,7 @@ const DiscoverCard = () => {
             <Image source={user.image} style={styles.image} />
             <View style={styles.infoContainer}>
               <Text style={styles.name}>{user.name}, {user.age !== null ? user.age : ''}</Text>
-              <Text style={styles.profession}>{user.profession}</Text>
+              <Text style={styles.profession}>{user.profession}, {user.gender}</Text>
               <View style={styles.distanceContainer}>
                 <Icon name="location-on" size={18} color="#aeadad" />
                 <Text style={styles.distance}>{user.distance}</Text>

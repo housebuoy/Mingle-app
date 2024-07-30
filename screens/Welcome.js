@@ -31,7 +31,7 @@ const Welcome = () => {
         console.log(userToken)
         const timer = setTimeout(() => {
           navigation.navigate('Home');
-        }, 3000); // 3000 milliseconds = 3 seconds
+        }, 6000); // 3000 milliseconds = 3 seconds
         return () => clearTimeout(timer);
       } else {
         // User is not logged in, navigate to the onboarding screen

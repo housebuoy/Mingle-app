@@ -37,11 +37,13 @@ export const UserProvider = ({ children }) => {
               const birthdate = new Date(userData.birthdate.toDate());
               const age = differenceInYears(new Date(), birthdate);
               const gallery = userData.gallery || [];
+              const location = userData.location || [];
 
               const updatedUserData = {
                 ...userData,
                 age,
                 gallery,
+                location
               };
 
               // Save user data to AsyncStorage
@@ -58,6 +60,7 @@ export const UserProvider = ({ children }) => {
               const parsedUserData = JSON.parse(storedUserData);
               setUserData(parsedUserData);
               setLoading(false);
+              console.log(userData?.location)
               return;
             }
             setLoading(false);
@@ -70,6 +73,7 @@ export const UserProvider = ({ children }) => {
         console.error('Error fetching user data:', error);
       } finally {
         setLoading(false);
+        console.log(userData?.gender)
       }
     };
 

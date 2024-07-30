@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View, ScrollView, Image, TouchableOpacity, Modal, ActivityIndicator} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useState} from 'react';
 import BottomNavBar from '../components/BottomNavBar'
 import cards from '../assets/images/icons/card-solid-trans.png';
 import heart from '../assets/images/icons/heart-solid-36.png';
@@ -20,7 +20,6 @@ const db = getFirestore();
 const auth = getAuth();
 const AccountProfileScreen = ({navigation}) => {
   const [galleryImages, setGalleryImages] = useState([]);
-  // const [userData, setUserData] = useState(null);
   const [isloading, setIsLoading] = useState(true);
   const [reveal, setReveal] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,11 +30,6 @@ const AccountProfileScreen = ({navigation}) => {
   const toggleReveal = () => {
     setReveal(!reveal);
   };
-
-  const data = 
-    {
-      distance: '1 km',
-    }
 
     const pickGalleryImagesAsync = async () => {
       console.log(userData.userId)
@@ -198,12 +192,12 @@ const AccountProfileScreen = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContainer}>
         <View style={{width: '100%', height: 130, borderRadius: 60, marginTop: 5, alignItems: 'center'}}>
-          <Image source={userData.profileImageUrl ? { uri: userData.profileImageUrl } : female1} resizeMode='cover' style={{width: 130, height: '100%', borderBottomLeftRadius: 30 , borderTopRightRadius: 30 , padding: 2}}/>
+          <Image source={userData?.profileImageUrl ? { uri: userData?.profileImageUrl } : female1} resizeMode='cover' style={{width: 130, height: '100%', borderBottomLeftRadius: 30 , borderTopRightRadius: 30 , padding: 2}}/>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 20}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
-            <Text style={{fontFamily: 'Poppins-Bold', fontSize: 24}}>{userData.firstName} {userData.lastName}, {userData.age}</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.occupation}</Text>
+            <Text style={{fontFamily: 'Poppins-Bold', fontSize: 24}}>{userData?.firstName} {userData?.lastName}, {userData?.age}</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData?.occupation}</Text>
           </View>
           <TouchableOpacity style={styles.topRightNav} onPress={() => navigation.navigate('ProfileUpdate')}>
             <Icon name="user-edit" type='font-awesome-5' size={24} color="#E94057" />
@@ -212,25 +206,25 @@ const AccountProfileScreen = ({navigation}) => {
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Username</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.username}</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData?.username}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Email Adress</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.email}</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData?.email}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Gender</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.gender}</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData?.gender}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 10}}>
           <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', gap: 0}}>
             <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Location</Text>
-            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData.address.city}, {userData.address.country}</Text>
+            <Text style={{fontFamily: 'Poppins-Regular', fontSize: 18, color: '#7f7e7e', marginTop: -7}}>{userData?.address.city}, {userData?.address.country}</Text>
           </View>
         </View>
         <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10}}>
@@ -245,7 +239,7 @@ const AccountProfileScreen = ({navigation}) => {
             marginTop: 2,
           }}
         >
-          {userData.userInfo}
+          {userData?.userInfo}
         </Text>
       ) : (
         <Text
@@ -256,9 +250,9 @@ const AccountProfileScreen = ({navigation}) => {
             marginTop: 2,
           }}
         >
-          {userData.userInfo.length > 50
-            ? userData.userInfo.slice(0, 76) + '...'
-          : userData.userInfo}
+          {userData?.userInfo.length > 50
+            ? userData?.userInfo.slice(0, 76) + '...'
+          : userData?.userInfo}
         </Text>
       )}
           </View>
@@ -269,7 +263,7 @@ const AccountProfileScreen = ({navigation}) => {
         <View style={{flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', marginTop: 10}}>
           <Text style={{fontFamily: 'Poppins-SemiBold', fontSize: 20}}>Interests</Text>
           <View  style={{flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'flex-start', flexWrap: 'wrap', gap: 5}}>            
-              {userData.interests && userData.interests.map((interest, index) => (
+              {userData?.interests && userData?.interests.map((interest, index) => (
                 <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'center'}]} onPress={()=> console.log(userData.gallery)}>
                   <Text key={index} style={styles.interestTabText}>{interest}</Text>
                 </TouchableOpacity>
@@ -285,7 +279,7 @@ const AccountProfileScreen = ({navigation}) => {
             <Icon name="add-photo-alternate" size={48} color="#E94057" />
           </TouchableOpacity>
           <ScrollView>
-            <GalleryViewer images={userData.gallery} onRemoveImage={removeImage} />
+            <GalleryViewer images={userData?.gallery} onRemoveImage={removeImage} />
           </ScrollView>
       {modalVisible && (
         <View style={styles.modalContainer}>

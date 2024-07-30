@@ -18,6 +18,8 @@ const DiscoverCard = () => {
       const { likedUsers } = useLikedUsers();
       const [loading, setLoading] = useState(true);
       const { userData} = useUser();
+      const { matched } = useLikedUsers();
+      const { ageInterval } = useLikedUsers(); // bound to be removed
       const [lastVisible, setLastVisible] = useState(null);
       const [error, setError] = useState(null);
       const swiperRef = useRef(null);
@@ -47,30 +49,47 @@ const DiscoverCard = () => {
       
         return distance.toFixed(2); // Round to two decimal places
       };
+
+      
       
 
       
 
-      const fetchUsers = async (currentUserId) => {
-        try {
-          const querySnapshot = await getDocs(collection(db, 'users'));
-          const usersList = querySnapshot.docs
-            .map(doc => ({
-              ...doc.data(),
-              id: doc.id,
-            }))
-            .filter(user => user.id !== currentUserId); // Exclude the current user
-          return usersList;
-        } catch (error) {
-          console.error('Error fetching users:', error);
-          throw error;
-        }
-      };
+const fetchUsers = async (currentUserId) => {
+  // Retrieve the ageRange value from AsyncStorage and convert it to a number
+  try {
+    const querySnapshot = await getDocs(collection(db, 'users'));
+    const currentYear = new Date().getFullYear();
+    const storedAgeRange = await AsyncStorage.getItem('ageRange');
+    console.log(storedAgeRange, typeof(storedAgeRange))
+    if (storedAgeRange) {
+      console.warn(JSON.parse(storedAgeRange))
+    }
+
+    const usersList = querySnapshot.docs
+      .map(doc => {
+        const userData = doc.data();
+        const userBirthYear = userData.birthdate.toDate().getFullYear();
+        const userAge = currentYear - userBirthYear;
+
+        return {
+          ...userData,
+          id: doc.id,
+          age: userAge
+        };
+      })
+      .filter(user => user.id !== currentUserId  && user.age <= storedAgeRange); // Exclude the current user and filter by age
+
+    return usersList;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    throw error;
+  }
+};
       
 
       useEffect(() => {
-        console.log(currentUserLocation?.latitude)
-        // console.log(user?.location.latitude)
+        
         const fetchWhoYouLiked = async () => {
           try {
             const currentUserId = await AsyncStorage.getItem('userToken');
@@ -152,11 +171,6 @@ const DiscoverCard = () => {
         console.log('Disliked:', users[cardIndex].name);
       };
     
-      // const handleSwipeRight = (cardIndex) => {
-      //   console.log('Liked:', users[cardIndex].id);
-      //   setLikedUsers(prevLikedUsers => [...prevLikedUsers, users[cardIndex].id]);
-      // };
-
       const handleSwipeRight = async (cardIndex) => {
         const likedUserId = users[cardIndex].id;
         const currentUserId = await AsyncStorage.getItem('userToken');

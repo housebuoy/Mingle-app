@@ -9,7 +9,7 @@ import heartRed from '../assets/images/icons/heart-solid.png'
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
-import { data as users } from '../components/data'
+// import { data as users } from '../components/data'
 import { useLikedUsers } from '../hooks/likedUsersContext'
 import { collection, getFirestore,  doc, getDoc, query, getDocs, setDoc, startAfter, limit, where, arrayRemove, updateDoc, arrayUnion} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
@@ -22,13 +22,12 @@ const auth = getAuth()
 const MatchScreen = ({navigation}) => {
     const [isPopupVisible, setIsPopupVisible] = useState(false);
     const [activeIndex, setActiveIndex] = useState(1);
-    const [data, setData] = useState([])
-    const { likedUsers } = useLikedUsers();
     const [loading, setLoading] = useState(true);
+    const [data, setData] = useState([]);
     const [error, setError] = useState(null);
+    const { setMatched } = useLikedUsers();
     const [whoYouLiked, setWhoYouLiked] = useState([]);
     const [whoLikedYou, setWhoLikedYou] = useState([]);
-    // const [whoLikedYouData, setWhoLikedYouData] = useState([]);
     const [lastVisible, setLastVisible] = useState(null);
     const [allLoaded, setAllLoaded] = useState(false);
     const [currentUserId, setCurrentUserId] = useState('');
@@ -44,7 +43,10 @@ const MatchScreen = ({navigation}) => {
           const userDocRef = doc(db, 'users', userId);
           await updateDoc(userDocRef, { matches: arrayUnion(...matches) });
           console.log('Matches updated:', matches);
-    
+          
+          //context api setting matched users
+          setMatched(matches) 
+
           // Create chat rooms for each match
           for (const matchId of matches) {
             const chatRoomId = `${userId}-${matchId}`;
@@ -122,6 +124,7 @@ const MatchScreen = ({navigation}) => {
       } catch (err) {
         setError(err);
         setLoading(false);
+        console.log(err)
         setModalMessage('You are offline; Reconnect to the internet ');
             setModalVisible(true);
             setTimeout(() => {

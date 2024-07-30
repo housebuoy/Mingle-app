@@ -5,6 +5,8 @@ const LikedUsersContext = createContext();
 export const LikedUsersProvider = ({ children }) => {
     const [likedUsers, setLikedUsers] = useState([]);
     const [selectedInterests, setSelectedInterests] = useState([]);
+    const [matched, setMatched] = useState([]);
+    const [ageInterval, setAgeInterval] = useState();
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     const toggleModal = () => {
@@ -12,7 +14,7 @@ export const LikedUsersProvider = ({ children }) => {
       };
 
     return (
-        <LikedUsersContext.Provider value={{ likedUsers, setLikedUsers, selectedInterests, setSelectedInterests, isModalVisible, toggleModal }}>
+        <LikedUsersContext.Provider value={{ likedUsers, setLikedUsers, selectedInterests, matched, setMatched, setSelectedInterests, isModalVisible, toggleModal, ageInterval, setAgeInterval }}>
             {children}
         </LikedUsersContext.Provider>
     );

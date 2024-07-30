@@ -1,5 +1,4 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, Modal } from 'react-native';
-// import Slider from '@react-native-community/slider';
 import { Slider } from '@rneui/themed';
 import React, {useState} from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -11,17 +10,32 @@ import cards from '../assets/images/icons/card-solid-36.png';
 import heart from '../assets/images/icons/heart-solid-36.png';
 import messages from '../assets/images/icons/message-square-detail-solid-36.png';
 import user from '../assets/images/icons/user.png';
+import { useLikedUsers } from '../hooks/likedUsersContext' // bound to be removed
+import { Icon } from '@rneui/themed';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
-  // const [likedUsers, setLikedUsers] = useState([]);
+  const { setAgeInterval } = useLikedUsers();  // bound to be removed
   const [modalVisible, setModalVisible] = useState(false);
 
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };
 
-  const [activeIndex, setActiveIndex] = useState(-1);
+  const continueButton = async () => {
+    try {
+      // Save the ageRange to AsyncStorage as a number
+      await AsyncStorage.setItem('ageRange', JSON.stringify(ageRange));
+      setModalVisible(!modalVisible);
+      setAgeInterval(ageRange);// bound to be removed
+    } catch (error) {
+      console.error('Error saving ageRange to AsyncStorage:', error);
+    }
+  };
+
+  const [activeIndex, setActiveIndex] = useState(2);
 
   const handlePress = (index) => {
     if (activeIndex === index) {
@@ -29,6 +43,10 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
     } else {
       setActiveIndex(index);
     }
+    if(activeIndex == 2){
+      console.log(activeIndex)
+    }
+    
   };
 
   const handleClear = () => {
@@ -68,6 +86,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
 
       <Modal
         animationType="slide"
+        // onShow={() => console.log('showed') }
         visible={modalVisible}
         onRequestClose={toggleModal}
         transparent={true}
@@ -75,9 +94,12 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalTopContent}>
-              <Text style={styles.contentHeading}>Filters</Text>
-              <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
+            <TouchableOpacity style={styles.clearButton} onPress={() => handleClear()}>
                 <Text style={styles.clearButtonText}>Clear</Text>
+              </TouchableOpacity>
+              <Text style={styles.contentHeading}>Filters</Text>
+              <TouchableOpacity style={[styles.clearButton,{justifyContent: 'flex-end'}]} onPress={() => toggleModal()}>
+                <Icon name="close" size={36} color="#E94057" />
               </TouchableOpacity>
             </View>
             <View style={styles.modalConfig}>
@@ -102,7 +124,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                     onPress={() => handlePress(1)}
                   >
                   <Text style={[
-                      styles.maleButtonText, 
+                      styles.femaleButtonText, 
                       activeIndex === 1 ? styles.activeButtonText : null
                     ]}>Female</Text>
                   </TouchableOpacity>
@@ -128,7 +150,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                   style={styles.slider}
                   value={distance}
                   onValueChange={handleDistanceChange}
-                  minimumValue={0}
+                  minimumValue={10}
                   maximumValue={100}
                   step={1}
                   thumbStyle={styles.thumb}
@@ -140,7 +162,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
             </View>
             <View style={styles.distanceContainer}>
               <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                <Text style={styles.genderConfigHead}>Age</Text>
+                <Text style={styles.genderConfigHead}>Maximum Age</Text>
                 <Text style={styles.label}>{ageRange} yrs</Text>
               </View>
                 <Slider
@@ -157,7 +179,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                   maximumTrackTintColor ='#ddd'
                 />
             </View>
-            <TouchableOpacity onPress={toggleModal} style={styles.continueButton}>
+            <TouchableOpacity onPress={()=>continueButton()} style={styles.continueButton}>
               <Text style={styles.closeButton}>Continue</Text>
             </TouchableOpacity>
             </View>
@@ -206,7 +228,7 @@ const styles = StyleSheet.create({
   contentHeading: {
     fontFamily: 'Poppins-Bold',
     fontSize: 26,
-    flex: 1.5,
+    flex: 1,
     textAlign: 'right'
   },
   modalTopContent:{
@@ -218,7 +240,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   clearButtonText: {
-      textAlign: 'right',
+      textAlign: 'center',
       color: '#e94057',
       fontFamily: 'Poppins-Bold',
       fontSize: 18

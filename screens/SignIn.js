@@ -43,12 +43,12 @@ const SignIn = ({navigation}) => {
         </View>
         <View style={{flex: 1, flexDirection: 'row', alignItems: 'flex-end', marginEnd: 1, justifyContent: "center", gap: 40,}}>
             <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{}}>
-                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16, color: '#E94057'}}>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16, color: '#E94057'}} onPress={() => navigation.navigate('TermsAndConditions')}>
                     Terms of use
                 </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{}}>
-                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16, color: '#E94057',}}>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16, color: '#E94057',}} onPress={() => navigation.navigate('TermsAndConditions')}>
                     Privacy Policy
                 </Text>
             </TouchableOpacity>

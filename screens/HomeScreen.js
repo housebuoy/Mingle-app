@@ -26,9 +26,14 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
 
   const continueButton = async () => {
     try {
-      // Save the ageRange to AsyncStorage as a number
-      await AsyncStorage.setItem('ageRange', JSON.stringify(ageRange));
-      await AsyncStorage.setItem('genderActive', activeGender);
+      // Save the ageRange to AsyncStorage as a 
+      if (ageRange !== null){
+        await AsyncStorage.setItem('ageRange', JSON.stringify(ageRange));
+      }
+      if(activeGender !== null){
+        await AsyncStorage.setItem('genderActive', activeGender);
+      }
+      console.log('success', ageRange, activeGender) 
       setModalVisible(!modalVisible);
     } catch (error) {
       console.error('Error saving ageRange to AsyncStorage:', error);

@@ -4,7 +4,7 @@ import Swiper from 'react-native-deck-swiper';
 import { Icon } from 'react-native-elements';
 import { useLikedUsers } from '../hooks/likedUsersContext';
 import { useUser } from '../context/UseContext';
-import { collection, getDocs, getFirestore,  doc, query, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
+import { collection, getDocs, getFirestore,  doc, query, where, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -61,7 +61,7 @@ const DiscoverCard = () => {
       
           const storedAgeRange = parseInt(await AsyncStorage.getItem('ageRange'), 10);
           const genderActive = await AsyncStorage.getItem('genderActive');
-      
+          console.log(genderActive)
           const currentYear = new Date().getFullYear();
           
           let queryConstraints = [];

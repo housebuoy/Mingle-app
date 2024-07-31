@@ -4,7 +4,7 @@ import Swiper from 'react-native-deck-swiper';
 import { Icon } from 'react-native-elements';
 import { useLikedUsers } from '../hooks/likedUsersContext';
 import { useUser } from '../context/UseContext';
-import { collection, getDocs, getFirestore,  doc, setDoc, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
+import { collection, getDocs, getFirestore,  doc, query, updateDoc, getDoc, arrayUnion } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -15,13 +15,15 @@ const DiscoverCard = () => {
       const auth = getAuth();
       const [users, setUsers] = useState([]);
       const [whoYouLiked, setWhoYouLiked] = useState([]);
-      const { likedUsers } = useLikedUsers();
+      const { activeGender } = useLikedUsers();
       const [loading, setLoading] = useState(true);
       const { userData} = useUser();
       const { matched } = useLikedUsers();
       const { ageInterval } = useLikedUsers(); // bound to be removed
       const [lastVisible, setLastVisible] = useState(null);
+      const [lastViewedIndex, setLastViewedIndex] = useState(0);
       const [error, setError] = useState(null);
+      const [showReload, setShowReload] = useState(false);
       const swiperRef = useRef(null);
 
       const currentUserLocation = userData?.location
@@ -50,46 +52,56 @@ const DiscoverCard = () => {
         return distance.toFixed(2); // Round to two decimal places
       };
 
+     
+      const fetchUsers = async (currentUserId, lastIndex) => {
+        try {
+          const currentUserDoc = await getDoc(doc(db, 'users', currentUserId));
+          const currentUserData = currentUserDoc.data();
+          const whoYouLiked = currentUserData.whoYouLiked || [];
       
+          const storedAgeRange = parseInt(await AsyncStorage.getItem('ageRange'), 10);
+          const genderActive = await AsyncStorage.getItem('genderActive');
       
-
+          const currentYear = new Date().getFullYear();
+          
+          let queryConstraints = [];
+          if (genderActive && genderActive !== 'all') {
+            queryConstraints.push(where('gender', '==', genderActive));
+          }
       
-
-const fetchUsers = async (currentUserId) => {
-  // Retrieve the ageRange value from AsyncStorage and convert it to a number
-  try {
-    const querySnapshot = await getDocs(collection(db, 'users'));
-    const currentYear = new Date().getFullYear();
-    const storedAgeRange = await AsyncStorage.getItem('ageRange');
-    console.log(storedAgeRange, typeof(storedAgeRange))
-    if (storedAgeRange) {
-      console.warn(JSON.parse(storedAgeRange))
-    }
-
-    const usersList = querySnapshot.docs
-      .map(doc => {
-        const userData = doc.data();
-        const userBirthYear = userData.birthdate.toDate().getFullYear();
-        const userAge = currentYear - userBirthYear;
-
-        return {
-          ...userData,
-          id: doc.id,
-          age: userAge
-        };
-      })
-      .filter(user => user.id !== currentUserId  && user.age <= storedAgeRange); // Exclude the current user and filter by age
-
-    return usersList;
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    throw error;
-  }
-};
+          const querySnapshot = await getDocs(query(collection(db, 'users'), ...queryConstraints));
       
+          const usersList = querySnapshot.docs
+            .map(doc => {
+              const userData = doc.data();
+              const userBirthYear = userData.birthdate.toDate().getFullYear();
+              const userAge = currentYear - userBirthYear;
+      
+              return {
+                ...userData,
+                id: doc.id,
+                age: userAge,
+              };
+            })
+            .filter(user => {
+              const isValidAge = storedAgeRange ? user.age <= storedAgeRange : true;
+              const isNotCurrentUser = user.id !== currentUserId;
+              const isNotLikedByCurrentUser = !whoYouLiked.includes(user.id);
+      
+              return isValidAge && isNotCurrentUser && isNotLikedByCurrentUser;
+            });
+      
+          return usersList.slice(lastIndex);
+        } catch (error) {
+          console.error('Error fetching users:', error);
+          throw error;
+        }
+      };
+      
+            
 
       useEffect(() => {
-        
+        console.log(activeGender)
         const fetchWhoYouLiked = async () => {
           try {
             const currentUserId = await AsyncStorage.getItem('userToken');
@@ -111,7 +123,7 @@ const fetchUsers = async (currentUserId) => {
       const mapUserData = (userData) => {
         return userData.map(user => ({
           id: user.id,
-          name: `${user.firstName} ${user.lastName}`,
+          name: `${user.username}`,
           age: new Date().getFullYear() - new Date(user.birthdate.toDate()).getFullYear(),
           profession: user.occupation,
           gender: user.gender,
@@ -128,10 +140,14 @@ const fetchUsers = async (currentUserId) => {
           try {
             const currentUser = auth.currentUser;
             const currentUserId = await AsyncStorage.getItem('userToken');
+            const storedLastViewedIndex = await AsyncStorage.getItem('lastViewedIndex');
+            const lastIndex = storedLastViewedIndex ? parseInt(storedLastViewedIndex, 10) : 0;
+            setLastViewedIndex(lastIndex);
             console.log(currentUserId)
-            const fetchedUsers = await fetchUsers(currentUserId);
+            const fetchedUsers = await fetchUsers(currentUserId, lastIndex);
             const formattedUsers = mapUserData(fetchedUsers);
             setUsers(formattedUsers);
+            setShowReload(formattedUsers.length === 0);
           } catch (error) {
             console.log(error)
             setError('Failed to fetch user data. Please check your network connection.');
@@ -141,7 +157,7 @@ const fetchUsers = async (currentUserId) => {
         };
     
         fetchAndSetUsers();
-      }, []);
+      }, [whoYouLiked]);
     
       const handleRetry = () => {
         const fetchAndSetUsers = async () => {
@@ -150,9 +166,13 @@ const fetchUsers = async (currentUserId) => {
           try {
             const currentUser = auth.currentUser;
             const currentUserId = await AsyncStorage.getItem('userToken');
-            const fetchedUsers = await fetchUsers(currentUserId);
+            const storedLastViewedIndex = await AsyncStorage.getItem('lastViewedIndex');
+            const lastIndex = storedLastViewedIndex ? parseInt(storedLastViewedIndex, 10) : 0;
+            setLastViewedIndex(lastIndex);
+            const fetchedUsers = await fetchUsers(currentUserId, whoYouLiked, lastIndex);
             const formattedUsers = mapUserData(fetchedUsers);
             setUsers(formattedUsers);
+            setShowReload(formattedUsers.length === 0);
           } catch (error) {
             console.log(error)
             setError('Failed to fetch user data. Please check your network connection.');
@@ -164,16 +184,29 @@ const fetchUsers = async (currentUserId) => {
         fetchAndSetUsers();
       };
 
-      
-    
+      const handleCardView = async (viewedIndex) => {
+        try {
+          await AsyncStorage.setItem('lastViewedIndex', viewedIndex.toString());
+         const last = await AsyncStorage.getItem('lastViewedIndex');
+          setLastViewedIndex(viewedIndex);
+          console.warn(last)
+          if (viewedIndex >= users.length - 1) {
+            setShowReload(true);
+          }
+        } catch (error) {
+          console.error('Error saving last viewed index:', error);
+        }
+      };  
     
       const handleSwipeLeft = (cardIndex) => {
         console.log('Disliked:', users[cardIndex].name);
+        handleCardView(cardIndex)
       };
     
       const handleSwipeRight = async (cardIndex) => {
         const likedUserId = users[cardIndex].id;
         const currentUserId = await AsyncStorage.getItem('userToken');
+        handleCardView(cardIndex)
       
         if (currentUserId) {
           // Retrieve the current user's 'whoYouLiked' array from Firestore
@@ -209,6 +242,7 @@ const fetchUsers = async (currentUserId) => {
 
       const handleSwipeTop = (cardIndex) => {
         console.log('Super liked:', users[cardIndex].name);
+        handleCardView(cardIndex)
       };
     
       const renderCard = (user) => {
@@ -255,72 +289,47 @@ const fetchUsers = async (currentUserId) => {
                 <View style={styles.loaderContainer}>
                    <ActivityIndicator size="large" color="#e94057" />
                 </View>
+                ): showReload ? (
+                  <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>No more users available. Try reloading or broadening your search criteria.</Text>
+                  </View>
                 ) : ( <View style={styles.subContainer}>
                 <View style={{marginTop: -50}}>
-            <Swiper
-              ref={swiperRef}
-              cards={users}
-              renderCard={renderCard}
-              onSwipedLeft={handleSwipeLeft}
-              onSwipedRight={handleSwipeRight}
-              onSwipedTop={handleSwipeTop}
-              cardIndex={0}
-              backgroundColor={'#f8f8f8'}
-              stackSize={5}
-              showSecondCard={true}
-              infinite
-            />
-          </View>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity onPress={() => swiperRef.current.swipeLeft()} style={styles.actionButton}>
-              <Icon name="close" type="font-awesome" size={35} color="#ff6b6b" />
-            </TouchableOpacity>
-            <View style={styles.heartButtonContainer}>
-              <TouchableOpacity onPress={() => swiperRef.current.swipeRight()} style={styles.heartButton}>
-                <Icon name="favorite" type="material" size={50} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.heartButtonContainer}>
-              <TouchableOpacity onPress={() => swiperRef.current.swipeTop()} style={styles.actionButton}>
-                <Icon name="star" type="material" size={35} color="#8a2387" />
-              </TouchableOpacity>
-            </View>
-          </View> 
-          </View>
+                <Swiper
+                  ref={swiperRef}
+                  cards={users}
+                  renderCard={renderCard}
+                  onSwipedLeft={handleSwipeLeft}
+                  onSwipedRight={handleSwipeRight}
+                  onSwipedTop={handleSwipeTop}
+                  onSwipedBottom={handleSwipeTop}
+                  cardIndex={0}
+                  backgroundColor={'#f8f8f8'}
+                  stackSize={5}
+                  showSecondCard={true}
+                  // infinite
+                />
+              </View>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity onPress={() => swiperRef.current.swipeLeft()} style={styles.actionButton}>
+                  <Icon name="close" type="font-awesome" size={35} color="#ff6b6b" />
+                </TouchableOpacity>
+                <View style={styles.heartButtonContainer}>
+                  <TouchableOpacity onPress={() => swiperRef.current.swipeRight()} style={styles.heartButton}>
+                    <Icon name="favorite" type="material" size={50} color="#fff" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.heartButtonContainer}>
+                  <TouchableOpacity onPress={() => swiperRef.current.swipeTop()} style={styles.actionButton}>
+                    <Icon name="star" type="material" size={35} color="#8a2387" />
+                  </TouchableOpacity>
+                </View>
+              </View> 
+              </View>
             )}
         </View>
       );
     };
-          {/* <View>
-            <Swiper
-              ref={swiperRef}
-              cards={users}
-              renderCard={renderCard}
-              onSwipedLeft={handleSwipeLeft}
-              onSwipedRight={handleSwipeRight}
-              onSwipedTop={handleSwipeTop}
-              cardIndex={0}
-              backgroundColor={'#f8f8f8'}
-              stackSize={3}
-              showSecondCard={true}
-              infinite
-            />
-          </View>
-          <View style={styles.actionButtons}>
-            <TouchableOpacity onPress={() => swiperRef.current.swipeLeft()} style={styles.actionButton}>
-              <Icon name="close" type="font-awesome" size={35} color="#ff6b6b" />
-            </TouchableOpacity>
-            <View style={styles.heartButtonContainer}>
-              <TouchableOpacity onPress={() => swiperRef.current.swipeRight()} style={styles.heartButton}>
-                <Icon name="favorite" type="material" size={50} color="#fff" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.heartButtonContainer}>
-              <TouchableOpacity onPress={() => swiperRef.current.swipeTop()} style={styles.actionButton}>
-                <Icon name="star" type="material" size={35} color="#8a2387" />
-              </TouchableOpacity>
-            </View>
-          </View> */}
 
 export default DiscoverCard
 
@@ -430,10 +439,14 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        marginHorizontal: 25,
+        width: '80%',
       },
       errorText: {
         color: '#e94057',
         marginBottom: 20,
+        textAlign: 'center',
+        fontFamily: 'Poppins-Medium'
       },
       retryButton: {
         padding: 10,

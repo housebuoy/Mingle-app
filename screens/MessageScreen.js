@@ -380,7 +380,7 @@ const MessageScreen = ({navigation}) => {
 
   const renderSearchItem = ({ item }) => (
     <View style={styles.userContainer}>
-      <Image source={{ uri: item.profileImageUrl }} style={styles.userImage} />
+      <Image source={item.profileImageUrl? { uri: item.profileImageUrl }: user} style={styles.userImage} />
       <TouchableOpacity style={styles.userInfo} onPress={() => navigation.navigate('Chat', { userId: item.id, userName: item.username, profilePicture: item.profileImageUrl })}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', }}>
           <Text style={styles.userName}>{item.username}</Text>

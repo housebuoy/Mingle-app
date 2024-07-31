@@ -22,6 +22,10 @@ const ProfileScreen = ({ navigation }) => {
   const [userInfo, setUserInfo] = useState(''); 
   const [selectedImage, setSelectedImage] = useState(null);
   const { userData } = useUser();
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
   
   
   const [loading, setLoading] = useState(false);
@@ -68,17 +72,15 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
   
+
   const uploadProfileImage = async (imageUri) => {
     setLoading(true);
-  
+    const auth = getAuth();
+    const userId = await AsyncStorage.getItem('userToken');
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (!user) {
+      if (!userId) {
         throw new Error('No user is signed in');
       }
-  
-      const userId = user.uid;
       const storage = getStorage();
       const storageRef = ref(storage, `users/${userId}/profile.jpg`);
   
@@ -93,14 +95,15 @@ const ProfileScreen = ({ navigation }) => {
       // Save the download URL to Firestore
       const firestore = getFirestore();
       const userRef = doc(firestore, 'users', userId);
-      await updateDoc(userRef, {
-        profileImageUrl: downloadURL,
-      });
+      // await updateDoc(userRef, {
+      //   profileImageUrl: downloadURL,
+      // });
       console.log(downloadURL)
       console.log('Profile image uploaded and URL saved to Firestore');
-      await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
+      // await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
     } catch (error) {
       console.error('Error uploading profile image:', error);
+      console.error(userId);
       setModalMessage('Failed to upload profile image');
       setModalVisible(true);
       setTimeout(() => {
@@ -119,13 +122,14 @@ const ProfileScreen = ({ navigation }) => {
         lastName: lastName,
         occupation: occupation,
         birthdate: date,
-        profileImageUrl: profileImageUrl, // Use the selected image URL from Firebase Storage
+        // profileImageUrl: profileImageUrl, // Use the selected image URL from Firebase Storage
         userInfo: userInfo,
       });
       console.log(profileImageUrl);
       console.log('User profile info updated successfully');
     } catch (error) {
       console.error('Error storing profile info:', error);
+      console.log(userInfo)
     }
   };
 
@@ -134,9 +138,13 @@ const handleProfileUpdate = async (downloadURL) => {
   try {
     const userId = await AsyncStorage.getItem('userToken');
     if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && downloadURL !== null && userInfo !== ''){
-        // await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
+      try{       
+          await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
             console.log('profile updated');
             navigation.navigate('Account')
+          }catch(error){
+            console.error(error)
+          }
     }else{
       setModalMessage('Please fill all fields including the profile image');
       setModalVisible(true);
@@ -154,6 +162,11 @@ const handleProfileUpdate = async (downloadURL) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.centeredContainer}>
+              <TouchableOpacity style={{alignSelf: 'flex-start', }} onPress={() => handleGoBack()}>
+                <Text style={{fontFamily: 'Poppins-Bold', fontSize: 20, color: "#E94057", lineHeight: 25, }}>
+                  Back
+                </Text>
+              </TouchableOpacity>
         <Text style={styles.profileTitle}>Profile details</Text>
         <TouchableOpacity style={styles.profileImageContainer} onPress={pickImageAsync}>
         <ImageViewer

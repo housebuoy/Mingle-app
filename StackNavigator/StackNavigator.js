@@ -36,6 +36,8 @@ import UpdateGender from '../screens/UpdateGender.js';
 import UserMatchesInfoScreen from '../screens/UserMatchesInfoScreen.js';
 import DeleteAccount from '../screens/DeleteAccount.js';
 import ReportUser from '../screens/ReportUser.js';
+import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen.js';
+import TermsAndConditions from '../screens/TermsAndConditions.js';
 
 
 export default function App({profilePicture}) {
@@ -204,6 +206,18 @@ export default function App({profilePicture}) {
                 headerShown: false,
             }} />
             <Stack.Screen 
+            name="PrivacyPolicyScreen" 
+            component={PrivacyPolicyScreen}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
+            name="TermsAndConditions" 
+            component={TermsAndConditions}
+            options={{
+                headerShown: false,
+            }} />
+            <Stack.Screen 
             name="Chat" 
             component={ChatScreen}
             options={({ route }) => ({
@@ -244,7 +258,7 @@ export default function App({profilePicture}) {
             component={AccountProfileScreen}
             options={{
                 headerLeft: () => (
-                    <TouchableOpacity style={styles.topRightNav} onPress={handleGoBack}>
+                    <TouchableOpacity style={styles.topRightNav} onPress={() => handleGoBack()}>
                         <Icon name="chevron-left" type='entypto' size={30} color="#E94057" />
                     </TouchableOpacity>
                 ),

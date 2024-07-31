@@ -303,6 +303,14 @@ const AccountProfileScreen = ({navigation}) => {
             <Icon name="form-textbox-password" type='material-community' size={24} color="#E94057" />
             <Text style={styles.interestTabText}>Reset Password</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: 160, marginTop: 5}]} onPress={() => navigation.navigate('PrivacyPolicyScreen')}>
+            <Icon name="privacy-tip" type='material' size={24} color="#E94057" />
+            <Text style={styles.interestTabText}>Privacy Policy</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.interestTab, {flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: 230, marginTop: 5}]} onPress={() => navigation.navigate('TermsAndConditions')}>
+            <Icon name="code-of-conduct" type='octicon' size={24} color="#E94057" />
+            <Text style={styles.interestTabText}>Terms and Conditions</Text>
+          </TouchableOpacity>
       </View>
            
         

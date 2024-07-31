@@ -17,7 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
-  const { setAgeInterval } = useLikedUsers();  // bound to be removed
+  const { activeGender, setActiveGender } = useLikedUsers();
   const [modalVisible, setModalVisible] = useState(false);
 
   const toggleModal = () => {
@@ -28,8 +28,8 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
     try {
       // Save the ageRange to AsyncStorage as a number
       await AsyncStorage.setItem('ageRange', JSON.stringify(ageRange));
+      await AsyncStorage.setItem('genderActive', activeGender);
       setModalVisible(!modalVisible);
-      setAgeInterval(ageRange);// bound to be removed
     } catch (error) {
       console.error('Error saving ageRange to AsyncStorage:', error);
     }
@@ -37,16 +37,15 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
 
   const [activeIndex, setActiveIndex] = useState(2);
 
-  const handlePress = (index) => {
+  const handlePress = (index, gender) => {
     if (activeIndex === index) {
-      setActiveIndex(-1); // clear active state
+      setActiveIndex(-1);
+      setActiveGender(null); // clear active state
     } else {
       setActiveIndex(index);
-    }
-    if(activeIndex == 2){
-      console.log(activeIndex)
-    }
-    
+      setActiveGender(gender);
+      console.log(gender)
+    }   
   };
 
   const handleClear = () => {
@@ -59,7 +58,9 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
     setDistance(value);
   };
 
-  const [ageRange, setAgeRange] = useState(18);
+  
+
+  const [ageRange, setAgeRange] = useState(50);
 
   const handleAgeRangeChange = (value) => {
     setAgeRange(value);
@@ -110,7 +111,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                     styles.maleButton,
                     activeIndex === 0 ? styles.activeButton : null
                     ]}
-                    onPress={() => handlePress(0)}
+                    onPress={() => handlePress(0, 'Man')}
                     >
                     <Text style={[
                       styles.maleButtonText, 
@@ -121,7 +122,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                     styles.femaleButton,
                     activeIndex === 1 ? styles.activeButton : null
                     ]}
-                    onPress={() => handlePress(1)}
+                    onPress={() => handlePress(1, 'Woman')}
                   >
                   <Text style={[
                       styles.femaleButtonText, 
@@ -132,7 +133,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
                     styles.allButton,
                     activeIndex === 2 ? styles.activeButton : null
                     ]}
-                    onPress={() => handlePress(2)}>
+                    onPress={() => handlePress(2, 'all')}>
                     <Text style={[
                       styles.allButtonText, 
                       activeIndex === 2 ? styles.activeButtonText : null
@@ -143,7 +144,7 @@ const HomeScreen = ({navigation, location, likedUsers, setLikedUsers }) => {
             </View>
             <View style={styles.distanceContainer}>
               <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                <Text style={styles.genderConfigHead}>Distance</Text>
+                <Text style={styles.genderConfigHead}>Distance Apart</Text>
                 <Text style={styles.label}>{distance} km</Text>
               </View>
                 <Slider

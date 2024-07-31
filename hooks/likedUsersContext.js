@@ -8,13 +8,14 @@ export const LikedUsersProvider = ({ children }) => {
     const [matched, setMatched] = useState([]);
     const [ageInterval, setAgeInterval] = useState();
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [activeGender, setActiveGender] = useState(null);
 
     const toggleModal = () => {
         setIsModalVisible(!isModalVisible);
       };
 
     return (
-        <LikedUsersContext.Provider value={{ likedUsers, setLikedUsers, selectedInterests, matched, setMatched, setSelectedInterests, isModalVisible, toggleModal, ageInterval, setAgeInterval }}>
+        <LikedUsersContext.Provider value={{ likedUsers, setLikedUsers, selectedInterests, matched, setMatched, setSelectedInterests, isModalVisible, toggleModal, ageInterval, setAgeInterval, activeGender, setActiveGender }}>
             {children}
         </LikedUsersContext.Provider>
     );

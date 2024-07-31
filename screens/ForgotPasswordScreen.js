@@ -28,23 +28,28 @@ const ForgotPasswordScreen = ({navigation, route}) => {
         return email!== '' ;
       };
 
-      const passwordReset= () =>{
+      const passwordReset = async () => {
         if (validateForm()) {
-        sendPasswordResetEmail(auth, email )
-        setModalMessage("Check your email to reset your password");
-        setModalVisible(true);
-        setTimeout(() => {
-            setModalVisible(false);
-            navigation.navigate(screenName)
-          }, 3000);
-        }else {
-            setModalMessage("Please fill all required fields!");
-            setModalVisible(true);
-            setTimeout(() => {
-              setModalVisible(false);
-            }, 1000);
+          try {
+            await sendPasswordResetEmail(auth, email);
+            setModalMessage("Check your email to reset your password");
+          } catch (error) {
+            console.error(error);
+            setModalMessage("Error sending password reset email");
           }
-      }
+          setModalVisible(true);
+          setTimeout(() => {
+            setModalVisible(false);
+            navigation.navigate(screenName); // Replace `screenName` with your actual screen name
+          }, 3000);
+        } else {
+          setModalMessage("Please fill all required fields!");
+          setModalVisible(true);
+          setTimeout(() => {
+            setModalVisible(false);
+          }, 1000);
+        }
+      };
 
       const closeModal = () => {
         setModalVisible(false);

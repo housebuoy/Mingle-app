@@ -6,7 +6,7 @@ import apple from '../assets/images/signIcons/apple.png';
 import facebook from '../assets/images/signIcons/facebook.png';
 import google from '../assets/images/signIcons/google.png';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Login from './Login.js';
+
 
 const SignIn = ({navigation}) => {
   return (
@@ -57,7 +57,7 @@ const SignIn = ({navigation}) => {
         <Text style={{fontFamily: 'Poppins-Medium', color: "#8D8B8B", marginTop: 20, fontSize: 14, textAlign: 'center'}}>
             Already have an account?
         </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{}}>
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                 <Text style={{fontFamily: 'Poppins-Bold', color: '#E94057', marginLeft: 20}}>Sign In</Text>
         </TouchableOpacity>
         </View>

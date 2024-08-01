@@ -13,7 +13,6 @@ import messages from '../assets/images/icons/message-square-solid.png';
 import search from '../assets/images/icons/search-alt-regular-36.png';
 import user from '../assets/images/icons/user.png';
 import { Icon } from '@rneui/themed';
-import { data } from '../components/data'
 import { useUser } from '../context/UseContext';
 import * as ImagePicker from 'expo-image-picker';
 import { LinearProgress } from '@rneui/themed';

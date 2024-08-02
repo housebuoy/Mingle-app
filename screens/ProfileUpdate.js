@@ -133,10 +133,32 @@ const ProfileScreen = ({ navigation }) => {
     }
   };
 
+  const calculateAge = (birthdate) => {
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
 
 const handleProfileUpdate = async (downloadURL) => {
   try {
     const userId = await AsyncStorage.getItem('userToken');
+
+    const age = calculateAge(date);
+      if (age < 18) {
+        setModalMessage('You must be at least 18 years old to sign up.');
+        setModalVisible(true);
+        setTimeout(() => {
+          setModalVisible(false);
+        }, 1000);
+        return;
+      }
+      
     if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && downloadURL !== null && userInfo !== ''){
       try{       
           await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);

@@ -5,18 +5,19 @@ import { Icon } from '@rneui/base';
 export default function GalleryViewer({ images, onRemoveImage }) {
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.galleryContainer}>
-      {images.map((image, index) => (
-        <View key={index} style={styles.galleryImageContainer}>
-          <Image source={{ uri: image.downloadURL }} style={styles.galleryImage} resizeMode="cover" />
-          <TouchableOpacity
-            style={styles.removeButton}
-            onPress={() => onRemoveImage(index)}
-          >
-            <Icon name="delete" size={20} color="#e94057" />
-          </TouchableOpacity>
-        </View>
-      ))}
-      {images.length === 0 && (
+      {images && images.length > 0 ? (
+        images.map((image, index) => (
+          <View key={index} style={styles.galleryImageContainer}>
+            <Image source={{ uri: image?.downloadURL }} style={styles.galleryImage} resizeMode="cover" />
+            <TouchableOpacity
+              style={styles.removeButton}
+              onPress={() => onRemoveImage(index)}
+            >
+              <Icon name="delete" size={20} color="#e94057" />
+            </TouchableOpacity>
+          </View>
+        ))
+      ) : (
         <View style={[styles.galleryTab1]}>
           <Text style={styles.emptyText}>No images in the gallery</Text>
         </View>

@@ -95,7 +95,7 @@ const EmailInputScreen = ({ navigation }) => {
       await AsyncStorage.setItem('userToken', auth.currentUser.uid);
       await storeUserData(userId, userName, nameValue, email);
       const response = await signInWithEmailAndPassword(auth, email, password);
-      Alert.alert('Success', userId);
+      // Alert.alert('Success');
       navigation.navigate('EnableLocation');
     } catch (error) {
       console.log(error);

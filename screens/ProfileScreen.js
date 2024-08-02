@@ -98,9 +98,9 @@ const ProfileScreen = ({ navigation }) => {
       // Save the download URL to Firestore
       const firestore = getFirestore();
       const userRef = doc(firestore, 'users', userId);
-      // await updateDoc(userRef, {
-      //   profileImageUrl: downloadURL,
-      // });
+      await updateDoc(userRef, {
+        profileImageUrl: downloadURL,
+      });
       console.log(downloadURL)
       console.log('Profile image uploaded and URL saved to Firestore');
       // await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
@@ -135,16 +135,40 @@ const ProfileScreen = ({ navigation }) => {
   };
 
 
+  const calculateAge = (birthdate) => {
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDifference = today.getMonth() - birthDate.getMonth();
+    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+
 const handleProfileUpdate = async (downloadURL) => {
   try {
     const userId = await AsyncStorage.getItem('userToken');
+    const age = calculateAge(date);
+      if (age < 18) {
+        setModalMessage('You must be at least 18 years old to sign up.');
+        setModalVisible(true);
+        setTimeout(() => {
+          setModalVisible(false);
+        }, 1000);
+        return;
+      }
     if(firstName !== '' && lastName !== '' && occupation !== '' && date !== null && downloadURL !== null && userInfo !== ''){
+      setLoading(true);
       try{       
         await saveProfileToFirestore(userId, firstName, lastName, occupation, date, downloadURL, userInfo);
           console.log('profile updated');
-          navigation.navigate('Account')
+          navigation.navigate('Gender')
         }catch(error){
           console.error(error)
+        }finally{
+          setLoading(false);
         }
     }else{
       setModalMessage('Please fill all fields including the profile image');

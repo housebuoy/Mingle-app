@@ -1,21 +1,14 @@
 import React, { useEffect } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image } from 'react-native';
-// import { SafeAreaView } from 'react-native-safe-area-context';
+import { StyleSheet, Text, View, Image, Alert, BackHandler } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import logo from '../assets/images/logo.png';
 import mingle from '../assets/images/mingle.png';
 import fonts from '../components/Fonts'
-// import { useFonts } from 'expo-font';
-// import * as SplashScreen from 'expo-splash-screen';
-// import { useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-// import { checkUser } from '../hooks/useAuth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import app from '../utils/firebaseConfig';
 import { getAuth } from '@firebase/auth';
-
-
-
 
 const Welcome = () => {
   fonts()
@@ -24,24 +17,35 @@ const Welcome = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const checkUserToken = async () => {
-      const userToken = await AsyncStorage.getItem('userToken');
-      if (userToken !== null) {
-        // User is already logged in, navigate to the home screen
-        console.log(userToken)
+    const checkConnectionAndUserToken = async () => {
+      const state = await NetInfo.fetch();
+      if (state.isConnected && state.isInternetReachable) {
+        const userToken = await AsyncStorage.getItem('userToken');
         const timer = setTimeout(() => {
-          navigation.navigate('Home');
-        }, 6000); // 3000 milliseconds = 3 seconds
-        return () => clearTimeout(timer);
-      } else {
-        // User is not logged in, navigate to the onboarding screen
-        const timer = setTimeout(() => {
-          navigation.navigate('Onboarding');
+          if (userToken) {
+            navigation.navigate('Home');
+          } else {
+            navigation.navigate('Onboarding');
+          }
         }, 3000); // 3000 milliseconds = 3 seconds
         return () => clearTimeout(timer);
+      } else {
+        Alert.alert(
+          'No Internet Connection',
+          'Please check your internet connection and try again.',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                BackHandler.exitApp(); // Close the app
+              }
+            }
+          ]
+        );
       }
     };
-    checkUserToken();
+
+    checkConnectionAndUserToken();
   }, [navigation]);
 
 
@@ -62,7 +66,8 @@ const Welcome = () => {
 
 export default Welcome;
 
-const styles = StyleSheet.create({
+const 
+styles = StyleSheet.create({
   container: {
     flex: 1,
     // flexDirection: 'column',

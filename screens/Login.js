@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image, ActivityIndicator, Modal } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, TextInput, TouchableOpacity, Image, ActivityIndicator, Modal, Alert } from 'react-native';
 import apple from '../assets/images/signIcons/apple.png';
 import facebook from '../assets/images/signIcons/facebook.png';
 import google from '../assets/images/signIcons/google.png';
@@ -23,7 +23,13 @@ const Login = ({ navigation }) => {
   const isFocused = useRef(false);
   const { setUserData } = useUser();
 
-
+  const handleSocialLoginClick = () => {
+    Alert.alert(
+      'Notice',
+      'Oops! There is a problem and our engineers are working hard to solve it.',
+      [{ text: 'OK' }]
+    );
+  };
   
   useEffect(() => {
     const checkUserLogin = async () => {
@@ -191,13 +197,13 @@ const Login = ({ navigation }) => {
         </View>
 
         <View style={styles.socialButtons}>
-          <TouchableOpacity style={styles.socialButton} onPress={() => navigation.navigate('FacebookSignIn')}>
+          <TouchableOpacity style={styles.socialButton} onPress={() => handleSocialLoginClick()}>
             <Image source={facebook} style={styles.socialIcon} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton} onPress={() => navigation.navigate('GoogleSignIn')}>
+          <TouchableOpacity style={styles.socialButton} onPress={() => handleSocialLoginClick()}>
             <Image source={google} style={styles.socialIcon} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.socialButton} onPress={() => navigation.navigate('AppleSignIn')}>
+          <TouchableOpacity style={styles.socialButton} onPress={() => handleSocialLoginClick()}>
             <Image source={apple} style={styles.socialIcon} />
           </TouchableOpacity>
         </View>

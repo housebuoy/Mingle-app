@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Text, StatusBar, Image, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StatusBar, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native'
 import logo from '../assets/images/logo.png';
 import line from '../assets/images/line.png';
 import apple from '../assets/images/signIcons/apple.png';
@@ -9,6 +9,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const SignIn = ({navigation}) => {
+
+    const handleSocialLoginClick = () => {
+        Alert.alert(
+          'Notice',
+          'Oops! There is a problem and our engineers are working hard to solve it.',
+          [{ text: 'OK' }]
+        );
+      };
+
   return (
     <SafeAreaView style={styles.container}>
         <View>
@@ -21,9 +30,9 @@ const SignIn = ({navigation}) => {
                     Continue with email
                 </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('MobileLogin')} style={{}}>
+            {/* <TouchableOpacity onPress={() => navigation.navigate('MobileLogin')} style={{}}>
                 <Text style={{fontFamily: 'Poppins-Bold', color: '#E94057', marginTop: 20, fontSize: 18, textAlign: 'center'}}>Use phone number</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
         <View style={{flex: 1, flexDirection: 'row', marginTop: 20, justifyContent: "center", marginHorizontal: 20}}>
             <Image source={line} style={styles.line} resizeMode="contain" />
@@ -31,13 +40,13 @@ const SignIn = ({navigation}) => {
             <Image source={line} style={styles.line} resizeMode="contain" />
         </View>
         <View style={{flex: 1, flexDirection: 'row', marginTop: 20, alignItems: 'center', justifyContent: "center", gap: 40, marginHorizontal: 20}}>
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{paddingHorizontal:15, paddingVertical:15, borderRadius: 10, backgroundColor: '#d6d8d8'}}>
+            <TouchableOpacity onPress={() => handleSocialLoginClick()} style={{paddingHorizontal:15, paddingVertical:15, borderRadius: 10, backgroundColor: '#d6d8d8'}}>
                 <Image source={facebook} style={{}} resizeMode="contain" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{paddingHorizontal:15, paddingVertical:15, borderRadius: 10, backgroundColor: '#d6d8d8'}}>
+            <TouchableOpacity onPress={() => handleSocialLoginClick()} style={{paddingHorizontal:15, paddingVertical:15, borderRadius: 10, backgroundColor: '#d6d8d8'}}>
                 <Image source={google} style={{}} resizeMode="contain" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{paddingHorizontal:15, paddingVertical:15, borderRadius: 10, backgroundColor: '#d6d8d8'}}>
+            <TouchableOpacity onPress={() => handleSocialLoginClick()} style={{paddingHorizontal:15, paddingVertical:15, borderRadius: 10, backgroundColor: '#d6d8d8'}}>
                 <Image source={apple} style={{}} resizeMode="contain" />
             </TouchableOpacity>
         </View>
@@ -48,7 +57,7 @@ const SignIn = ({navigation}) => {
                 </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('SignIn')} style={{}}>
-                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16, color: '#E94057',}} onPress={() => navigation.navigate('TermsAndConditions')}>
+                <Text style={{fontFamily: 'Poppins-Medium', fontSize: 16, color: '#E94057',}} onPress={() => navigation.navigate('PrivacyPolicyScreen')}>
                     Privacy Policy
                 </Text>
             </TouchableOpacity>
